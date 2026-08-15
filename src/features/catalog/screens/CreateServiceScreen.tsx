@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -50,39 +51,39 @@ export function CreateServiceScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScreenHeader
-        title="Add service"
-        subtitle="Duration drives appointment end time"
+        title={tr.services.add}
+        subtitle={tr.services.addSubtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.form}>
-        <Input label="Name" value={name} onChangeText={setName} placeholder="Haircut" />
+        <Input label={tr.services.name} value={name} onChangeText={setName} placeholder="Haircut" />
         <Input
-          label="Description"
+          label={tr.services.description}
           value={description}
           onChangeText={setDescription}
-          placeholder="Optional"
+          placeholder={tr.common.optional}
         />
         <Input
-          label="Duration (minutes)"
+          label={tr.services.duration}
           value={duration}
           onChangeText={setDuration}
           keyboardType="number-pad"
         />
         <Input
-          label="Price (major units)"
+          label={tr.services.priceMajor}
           value={price}
           onChangeText={setPrice}
           keyboardType="decimal-pad"
         />
         <Input
-          label="Currency"
+          label={tr.services.currency}
           value={currency}
           onChangeText={setCurrency}
           autoCapitalize="characters"
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
-          label="Create service"
+          label={tr.services.submit}
           onPress={onSubmit}
           loading={loading}
           disabled={name.trim().length < 2}

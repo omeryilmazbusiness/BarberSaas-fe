@@ -53,3 +53,29 @@ export interface AuthSession {
   user: User;
   tenant: Tenant;
 }
+
+/** Phone-authenticated customer for public booking portal. */
+export interface CustomerProfile {
+  id: string;
+  phone?: string;
+  email?: string;
+  full_name?: string;
+}
+
+export interface CustomerSession {
+  access_token: string;
+  expires_at: string;
+  customer: CustomerProfile;
+  tenant: Tenant;
+}
+
+export interface TimeSlot {
+  starts_at: string;
+  ends_at: string;
+  available: boolean;
+}
+
+export interface DayAvailability {
+  date: string; // YYYY-MM-DD
+  slots: TimeSlot[];
+}

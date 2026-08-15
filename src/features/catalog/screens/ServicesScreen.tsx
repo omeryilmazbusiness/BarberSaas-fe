@@ -8,6 +8,7 @@ import type { CatalogService } from '../../../core/types/domain';
 import { isAdminRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
@@ -45,13 +46,13 @@ export function ServicesScreen() {
   return (
     <Screen loading={loading}>
       <ScreenHeader
-        title="Services"
-        subtitle="Price and duration catalog"
+        title={tr.services.title}
+        subtitle={tr.services.subtitle}
         rightAction={
           canCreate ? (
             <IconButton
               name="add"
-              accessibilityLabel="Add service"
+              accessibilityLabel={tr.services.add}
               tone="accent"
               onPress={() => navigation.navigate(StackRoute.CreateService)}
             />
@@ -61,8 +62,8 @@ export function ServicesScreen() {
       {items.length === 0 ? (
         <EmptyState
           icon="pricetag-outline"
-          title="No services"
-          message="Add haircut and beard offerings to start booking."
+          title={tr.services.empty}
+          message={tr.services.emptyMessage}
         />
       ) : (
         <View style={styles.list}>

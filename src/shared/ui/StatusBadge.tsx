@@ -1,14 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { AppointmentStatus } from '../constants/statuses';
+import { tr } from '../i18n/tr';
 import { colors, radius, spacing, typography } from '../theme';
 
 const labels: Record<AppointmentStatus, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  cancelled: 'Cancelled',
-  completed: 'Completed',
-  no_show: 'No show',
+  pending: tr.status.pending,
+  confirmed: tr.status.confirmed,
+  cancelled: tr.status.cancelled,
+  completed: tr.status.completed,
+  no_show: tr.status.no_show,
 };
 
 interface StatusBadgeProps {

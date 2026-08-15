@@ -7,6 +7,7 @@ import { useAuth } from '../../../core/auth/AuthContext';
 import { isAdminRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
@@ -23,28 +24,28 @@ interface QuickAction {
 const actions: QuickAction[] = [
   {
     icon: 'calendar-outline',
-    label: 'Book appointment',
-    hint: 'Pick customer, barber, service, time',
+    label: tr.home.book,
+    hint: tr.home.bookHint,
     route: StackRoute.CreateAppointment,
   },
   {
     icon: 'person-add-outline',
-    label: 'Add barber',
-    hint: 'Create a bookable staff member',
+    label: tr.home.addBarber,
+    hint: tr.home.addBarberHint,
     route: StackRoute.CreateStaff,
     adminOnly: true,
   },
   {
     icon: 'pricetag-outline',
-    label: 'Add service',
-    hint: 'Catalog price and duration',
+    label: tr.home.addService,
+    hint: tr.home.addServiceHint,
     route: StackRoute.CreateService,
     adminOnly: true,
   },
   {
     icon: 'people-outline',
-    label: 'Add user',
-    hint: 'Manager, staff, or customer',
+    label: tr.home.addUser,
+    hint: tr.home.addUserHint,
     route: StackRoute.CreateUser,
     adminOnly: true,
   },
@@ -89,22 +90,22 @@ export function HomeScreen() {
   return (
     <Screen>
       <ScreenHeader
-        title={tenant?.name ?? 'Shop'}
+        title={tenant?.name ?? tr.common.shop}
         subtitle={user ? `${user.full_name} · ${user.role}` : undefined}
         rightAction={
-          <Pressable onPress={logout} style={styles.logout} accessibilityLabel="Sign out">
+          <Pressable onPress={logout} style={styles.logout} accessibilityLabel={tr.common.signOut}>
             <Ionicons name="log-out-outline" size={20} color={colors.ink} />
           </Pressable>
         }
       />
 
       <View style={styles.metrics}>
-        <Metric icon="calendar" label="Bookings" value={String(counts.appointments)} />
-        <Metric icon="cut" label="Barbers" value={String(counts.staff)} />
-        <Metric icon="pricetag" label="Services" value={String(counts.services)} />
+        <Metric icon="calendar" label={tr.home.bookings} value={String(counts.appointments)} />
+        <Metric icon="cut" label={tr.home.staff} value={String(counts.staff)} />
+        <Metric icon="pricetag" label={tr.home.services} value={String(counts.services)} />
       </View>
 
-      <Text style={styles.section}>Today’s flow</Text>
+      <Text style={styles.section}>{tr.home.today}</Text>
       <View style={styles.actions}>
         {visibleActions.map((action) => (
           <Pressable
@@ -126,11 +127,11 @@ export function HomeScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Tenant · {tenant?.slug} · {tenant?.status} · {tenant?.timezone}
+          {tr.common.shop} · {tenant?.slug} · {tenant?.status} · {tenant?.timezone}
         </Text>
         {services.useMockApi ? (
           <Button
-            label="Mock API active"
+            label={tr.home.mockApiActive}
             variant="ghost"
             onPress={() => undefined}
             disabled

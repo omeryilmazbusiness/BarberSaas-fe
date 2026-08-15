@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -40,26 +41,26 @@ export function CreateStaffScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScreenHeader
-        title="Add barber"
-        subtitle="Appears in booking picker when bookable"
+        title={tr.staff.add}
+        subtitle={tr.staff.addSubtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.form}>
         <Input
-          label="Display name"
+          label={tr.staff.name}
           value={displayName}
           onChangeText={setDisplayName}
           placeholder="Ali Demir"
         />
         <Input
-          label="Title"
+          label={tr.staff.roleTitle}
           value={title}
           onChangeText={setTitle}
           placeholder="Senior Barber"
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
-          label="Create staff"
+          label={tr.staff.submit}
           onPress={onSubmit}
           loading={loading}
           disabled={displayName.trim().length < 2}

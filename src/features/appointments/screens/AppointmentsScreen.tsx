@@ -7,6 +7,7 @@ import type { Appointment } from '../../../core/types/domain';
 import { AppointmentStatus } from '../../../shared/constants/statuses';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
@@ -55,7 +56,7 @@ export function AppointmentsScreen() {
       await services.appointments.confirm(id);
       await load();
     } catch (err) {
-      Alert.alert('Cannot confirm', errorMessage(err));
+      Alert.alert(tr.appointments.cannotConfirm, errorMessage(err));
     }
   };
 
@@ -64,7 +65,7 @@ export function AppointmentsScreen() {
       await services.appointments.cancel(id);
       await load();
     } catch (err) {
-      Alert.alert('Cannot cancel', errorMessage(err));
+      Alert.alert(tr.appointments.cannotCancel, errorMessage(err));
     }
   };
 
@@ -79,12 +80,12 @@ export function AppointmentsScreen() {
   return (
     <Screen loading={loading}>
       <ScreenHeader
-        title="Appointments"
-        subtitle="Confirm pending · cancel when needed"
+        title={tr.appointments.title}
+        subtitle={tr.appointments.subtitle}
         rightAction={
           <IconButton
             name="add"
-            accessibilityLabel="Book appointment"
+            accessibilityLabel={tr.appointments.bookA11y}
             tone="accent"
             onPress={() => navigation.navigate(StackRoute.CreateAppointment)}
           />
@@ -94,8 +95,8 @@ export function AppointmentsScreen() {
       {sorted.length === 0 ? (
         <EmptyState
           icon="calendar-outline"
-          title="No appointments"
-          message="Book the first visit from the plus button."
+          title={tr.appointments.empty}
+          message={tr.appointments.emptyMessage}
         />
       ) : (
         <View style={styles.list}>
@@ -103,7 +104,7 @@ export function AppointmentsScreen() {
             <ListRow
               key={item.id}
               title={formatDateTime(item.starts_at, tenant?.timezone)}
-              subtitle={`${staffMap[item.staff_id] ?? 'Barber'} · ${serviceMap[item.service_id] ?? 'Service'}`}
+              subtitle={`${staffMap[item.staff_id] ?? tr.appointments.barberFallback} · ${serviceMap[item.service_id] ?? tr.appointments.serviceFallback}`}
               meta={userMap[item.customer_id] ?? item.customer_id.slice(0, 8)}
               trailing={
                 <View style={styles.trailing}>
@@ -112,7 +113,7 @@ export function AppointmentsScreen() {
                     {item.status === AppointmentStatus.Pending ? (
                       <IconButton
                         name="checkmark"
-                        accessibilityLabel="Confirm"
+                        accessibilityLabel={tr.appointments.confirm}
                         tone="accent"
                         onPress={() => onConfirm(item.id)}
                       />
@@ -121,7 +122,7 @@ export function AppointmentsScreen() {
                     item.status === AppointmentStatus.Confirmed ? (
                       <IconButton
                         name="close"
-                        accessibilityLabel="Cancel"
+                        accessibilityLabel={tr.appointments.cancel}
                         tone="danger"
                         onPress={() => onCancel(item.id)}
                       />
@@ -133,7 +134,7 @@ export function AppointmentsScreen() {
           ))}
         </View>
       )}
-      <Text style={styles.hint}>Overlap is blocked for the same barber.</Text>
+      <Text style={styles.hint}>{tr.appointments.overlapHint}</Text>
     </Screen>
   );
 }

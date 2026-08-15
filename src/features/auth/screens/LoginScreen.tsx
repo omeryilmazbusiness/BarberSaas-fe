@@ -12,6 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
 import { AuthRoute } from '../../../shared/constants/routes';
 import type { AuthStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -54,15 +55,13 @@ export function LoginScreen({ navigation }: Props) {
           <View style={styles.logoMark}>
             <Ionicons name="cut-outline" size={28} color={colors.white} />
           </View>
-          <Text style={styles.brand}>BarberOps</Text>
-          <Text style={styles.tagline}>
-            Shop login for owners, managers, and staff.
-          </Text>
+          <Text style={styles.brand}>{tr.shopLogin.brand}</Text>
+          <Text style={styles.tagline}>{tr.shopLogin.tagline}</Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            label="Shop slug"
+            label={tr.shopLogin.slug}
             autoCapitalize="none"
             autoCorrect={false}
             value={tenantSlug}
@@ -70,7 +69,7 @@ export function LoginScreen({ navigation }: Props) {
             placeholder="acme-barber"
           />
           <Input
-            label="Email"
+            label={tr.shopLogin.email}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
@@ -79,7 +78,7 @@ export function LoginScreen({ navigation }: Props) {
             placeholder="you@shop.com"
           />
           <Input
-            label="Password"
+            label={tr.shopLogin.password}
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -88,13 +87,13 @@ export function LoginScreen({ navigation }: Props) {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Button label="Sign in" onPress={onSubmit} loading={loading} />
+          <Button label={tr.shopLogin.signIn} onPress={onSubmit} loading={loading} />
 
           <Pressable
             onPress={() => navigation.navigate(AuthRoute.SignupShop)}
             style={styles.linkWrap}
           >
-            <Text style={styles.link}>Open a new shop</Text>
+            <Text style={styles.link}>{tr.shopLogin.openShop}</Text>
             <Ionicons name="arrow-forward" size={16} color={colors.accent} />
           </Pressable>
         </View>
@@ -102,9 +101,7 @@ export function LoginScreen({ navigation }: Props) {
         {services.useMockApi ? (
           <View style={styles.mockHint}>
             <Ionicons name="flask-outline" size={16} color={colors.muted} />
-            <Text style={styles.mockText}>
-              Mock API on — use any password with slug `acme-barber`.
-            </Text>
+            <Text style={styles.mockText}>{tr.shopLogin.mockHint}</Text>
           </View>
         ) : null}
       </KeyboardAvoidingView>

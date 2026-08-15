@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   labelSecondary: {
-    color: colors.accent,
+    color: colors.ink,
   },
   labelGhost: {
     color: colors.ink,

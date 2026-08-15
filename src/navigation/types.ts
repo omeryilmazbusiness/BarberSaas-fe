@@ -1,5 +1,6 @@
 import {
   AuthRoute,
+  CustomerRoute,
   ShopTabRoute,
   StackRoute,
 } from '../shared/constants/routes';
@@ -17,7 +18,26 @@ export type ShopTabParamList = {
   [ShopTabRoute.Users]: undefined;
 };
 
+export type CustomerStackParamList = {
+  [CustomerRoute.Login]: { shopSlug: string };
+  [CustomerRoute.Services]: { shopSlug: string };
+  [CustomerRoute.Schedule]: { shopSlug: string; serviceId: string };
+  [CustomerRoute.Success]: {
+    shopSlug: string;
+    appointmentId: string;
+    startsAt: string;
+    serviceName: string;
+  };
+};
+
 export type RootStackParamList = {
+  [StackRoute.AdminLogin]: undefined;
+  [StackRoute.ManagerLogin]: { shopSlug: string };
+  [StackRoute.Customer]: {
+    shopSlug: string;
+    screen?: keyof CustomerStackParamList;
+    params?: CustomerStackParamList[keyof CustomerStackParamList];
+  };
   [StackRoute.Auth]: undefined;
   [StackRoute.Shop]: undefined;
   [StackRoute.CreateAppointment]: undefined;

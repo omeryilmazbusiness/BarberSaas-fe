@@ -4,5 +4,6 @@ import type { CreateShopInput, CreateShopResult } from '../../auth/services/Auth
 export interface TenantService {
   list(): Promise<Tenant[]>;
   getById(id: string): Promise<Tenant>;
+  getBySlug(slug: string): Promise<Tenant>;
   create(input: CreateShopInput): Promise<CreateShopResult>;
 }

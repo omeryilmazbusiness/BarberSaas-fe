@@ -8,6 +8,7 @@ import type { User } from '../../../core/types/domain';
 import { isAdminRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
@@ -54,13 +55,13 @@ export function UsersScreen() {
   return (
     <Screen loading={loading}>
       <ScreenHeader
-        title="Users"
-        subtitle="Managers, staff, customers"
+        title={tr.users.title}
+        subtitle={tr.users.subtitle}
         rightAction={
           canManage ? (
             <IconButton
               name="add"
-              accessibilityLabel="Add user"
+              accessibilityLabel={tr.users.add}
               tone="accent"
               onPress={() => navigation.navigate(StackRoute.CreateUser)}
             />
@@ -70,14 +71,14 @@ export function UsersScreen() {
       {forbidden ? (
         <EmptyState
           icon="lock-closed-outline"
-          title="Admin only"
-          message="Owner or manager role is required to list users."
+          title={tr.users.adminOnly}
+          message={tr.users.adminOnlyMessage}
         />
       ) : items.length === 0 ? (
         <EmptyState
           icon="people-outline"
-          title="No users"
-          message="Create staff or customer accounts to book appointments."
+          title={tr.users.empty}
+          message={tr.users.emptyMessage}
         />
       ) : (
         <View style={styles.list}>

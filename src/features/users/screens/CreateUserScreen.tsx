@@ -5,6 +5,7 @@ import { useAuth } from '../../../core/auth/AuthContext';
 import { UserRole, type UserRole as Role } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -50,32 +51,32 @@ export function CreateUserScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScreenHeader
-        title="Add user"
-        subtitle="Owner role cannot be created here"
+        title={tr.users.add}
+        subtitle={tr.users.addSubtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.form}>
         <Input
-          label="Full name"
+          label={tr.users.fullName}
           value={fullName}
           onChangeText={setFullName}
           placeholder="Can Yılmaz"
         />
         <Input
-          label="Email"
+          label={tr.users.email}
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
         <Input
-          label="Password"
+          label={tr.users.password}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
         <View style={styles.roles}>
-          <Text style={styles.roleLabel}>Role</Text>
+          <Text style={styles.roleLabel}>{tr.users.role}</Text>
           <View style={styles.chips}>
             {selectableRoles.map((r) => (
               <Text
@@ -90,7 +91,7 @@ export function CreateUserScreen({ navigation }: Props) {
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
-          label="Create user"
+          label={tr.users.submit}
           onPress={onSubmit}
           loading={loading}
           disabled={fullName.trim().length < 2 || !email || password.length < 6}

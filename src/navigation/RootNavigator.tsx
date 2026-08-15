@@ -7,6 +7,10 @@ import { StackRoute } from '../shared/constants/routes';
 import { colors } from '../shared/theme';
 import { AuthNavigator } from './AuthNavigator';
 import { ShopTabNavigator } from './ShopTabNavigator';
+import { CustomerPortalScreen } from './CustomerNavigator';
+import { linking } from './linking';
+import { AdminLoginScreen } from '../features/auth/screens/AdminLoginScreen';
+import { ManagerLoginScreen } from '../features/auth/screens/ManagerLoginScreen';
 import { CreateAppointmentScreen } from '../features/appointments/screens/CreateAppointmentScreen';
 import { CreateStaffScreen } from '../features/staff/screens/CreateStaffScreen';
 import { CreateServiceScreen } from '../features/catalog/screens/CreateServiceScreen';
@@ -28,19 +32,34 @@ export function RootNavigator() {
           backgroundColor: colors.paper,
         }}
       >
-        <ActivityIndicator size="large" color={colors.accent} />
+        <ActivityIndicator size="large" color={colors.ink} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
+        initialRouteName={StackRoute.AdminLogin}
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.paper },
         }}
       >
+        <Stack.Screen
+          name={StackRoute.AdminLogin}
+          component={AdminLoginScreen}
+        />
+        <Stack.Screen
+          name={StackRoute.ManagerLogin}
+          component={ManagerLoginScreen}
+        />
+        <Stack.Screen
+          name={StackRoute.Customer}
+          component={CustomerPortalScreen}
+          initialParams={{ shopSlug: 'acme-barber' }}
+        />
+
         {isAuthenticated ? (
           <>
             <Stack.Screen name={StackRoute.Shop} component={ShopTabNavigator} />
@@ -48,12 +67,18 @@ export function RootNavigator() {
               name={StackRoute.CreateAppointment}
               component={CreateAppointmentScreen}
             />
-            <Stack.Screen name={StackRoute.CreateStaff} component={CreateStaffScreen} />
+            <Stack.Screen
+              name={StackRoute.CreateStaff}
+              component={CreateStaffScreen}
+            />
             <Stack.Screen
               name={StackRoute.CreateService}
               component={CreateServiceScreen}
             />
-            <Stack.Screen name={StackRoute.CreateUser} component={CreateUserScreen} />
+            <Stack.Screen
+              name={StackRoute.CreateUser}
+              component={CreateUserScreen}
+            />
           </>
         ) : (
           <Stack.Screen name={StackRoute.Auth} component={AuthNavigator} />

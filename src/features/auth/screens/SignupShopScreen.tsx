@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
 import { AuthRoute } from '../../../shared/constants/routes';
 import type { AuthStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -53,19 +54,19 @@ export function SignupShopScreen({ navigation }: Props) {
   return (
     <Screen>
       <ScreenHeader
-        title="Open a shop"
-        subtitle="Creates a trial tenant and owner account."
+        title={tr.signup.title}
+        subtitle={tr.signup.subtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.form}>
         <Input
-          label="Shop name"
+          label={tr.signup.shopName}
           value={name}
           onChangeText={setName}
           placeholder="Acme Barber"
         />
         <Input
-          label="Slug"
+          label={tr.signup.slug}
           autoCapitalize="none"
           autoCorrect={false}
           value={slug}
@@ -73,34 +74,34 @@ export function SignupShopScreen({ navigation }: Props) {
           placeholder="acme-barber"
         />
         <Input
-          label="Timezone"
+          label={tr.signup.timezone}
           autoCapitalize="none"
           value={timezone}
           onChangeText={setTimezone}
           placeholder="Europe/Istanbul"
         />
-        <Text style={styles.section}>Owner</Text>
+        <Text style={styles.section}>{tr.signup.ownerSection}</Text>
         <Input
-          label="Full name"
+          label={tr.signup.ownerName}
           value={fullName}
           onChangeText={setFullName}
           placeholder="Jane Owner"
         />
         <Input
-          label="Email"
+          label={tr.signup.ownerEmail}
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
         <Input
-          label="Password"
+          label={tr.signup.password}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button label="Create shop & sign in" onPress={onSubmit} loading={loading} />
+        <Button label={tr.signup.submit} onPress={onSubmit} loading={loading} />
       </View>
     </Screen>
   );

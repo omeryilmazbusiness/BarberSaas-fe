@@ -12,6 +12,9 @@ export const ShopTabRoute = {
 } as const;
 
 export const StackRoute = {
+  AdminLogin: 'AdminLogin',
+  ManagerLogin: 'ManagerLogin',
+  Customer: 'Customer',
   Auth: 'Auth',
   Shop: 'Shop',
   CreateAppointment: 'CreateAppointment',
@@ -20,6 +23,14 @@ export const StackRoute = {
   CreateUser: 'CreateUser',
 } as const;
 
+export const CustomerRoute = {
+  Login: 'CustomerLogin',
+  Services: 'CustomerServices',
+  Schedule: 'CustomerSchedule',
+  Success: 'CustomerSuccess',
+} as const;
+
 export type AuthRoute = (typeof AuthRoute)[keyof typeof AuthRoute];
 export type ShopTabRoute = (typeof ShopTabRoute)[keyof typeof ShopTabRoute];
 export type StackRoute = (typeof StackRoute)[keyof typeof StackRoute];
+export type CustomerRoute = (typeof CustomerRoute)[keyof typeof CustomerRoute];

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,8 +9,10 @@ import { StaffScreen } from '../features/staff/screens/StaffScreen';
 import { ServicesScreen } from '../features/catalog/screens/ServicesScreen';
 import { UsersScreen } from '../features/users/screens/UsersScreen';
 import type { ShopTabParamList } from './types';
+import { tr } from '../shared/i18n/tr';
 import { colors } from '../shared/theme';
 import { useAuth } from '../core/auth/AuthContext';
+import { authPortal } from '../core/auth/tokenProvider';
 import { isAdminRole } from '../shared/constants/roles';
 
 const Tab = createBottomTabNavigator<ShopTabParamList>();
@@ -19,10 +21,16 @@ export function ShopTabNavigator() {
   const { user } = useAuth();
   const showUsers = user ? isAdminRole(user.role) : false;
 
+  useEffect(() => {
+    authPortal.set('shop');
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        title: tr.tabs[route.name as keyof typeof tr.tabs] ?? route.name,
+        tabBarLabel: tr.tabs[route.name as keyof typeof tr.tabs] ?? route.name,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: {

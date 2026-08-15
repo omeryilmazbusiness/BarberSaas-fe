@@ -8,6 +8,7 @@ import type { StaffMember } from '../../../core/types/domain';
 import { isAdminRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
@@ -44,13 +45,13 @@ export function StaffScreen() {
   return (
     <Screen loading={loading}>
       <ScreenHeader
-        title="Barbers"
-        subtitle="Bookable staff members"
+        title={tr.staff.title}
+        subtitle={tr.staff.subtitle}
         rightAction={
           canCreate ? (
             <IconButton
               name="add"
-              accessibilityLabel="Add barber"
+              accessibilityLabel={tr.staff.add}
               tone="accent"
               onPress={() => navigation.navigate(StackRoute.CreateStaff)}
             />
@@ -60,8 +61,8 @@ export function StaffScreen() {
       {items.length === 0 ? (
         <EmptyState
           icon="cut-outline"
-          title="No barbers yet"
-          message="Owners and managers can add bookable staff."
+          title={tr.staff.empty}
+          message={tr.staff.emptyMessage}
         />
       ) : (
         <View style={styles.list}>
@@ -69,8 +70,8 @@ export function StaffScreen() {
             <ListRow
               key={item.id}
               title={item.display_name}
-              subtitle={item.title || 'Barber'}
-              meta={item.is_bookable ? 'Bookable' : 'Not bookable'}
+              subtitle={item.title || tr.staff.fallback}
+              meta={item.is_bookable ? tr.staff.bookable : tr.staff.notBookable}
               leading={
                 <View style={styles.avatar}>
                   <Ionicons name="person" size={18} color={colors.accent} />

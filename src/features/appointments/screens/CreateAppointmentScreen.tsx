@@ -6,6 +6,7 @@ import type { CatalogService, StaffMember, User } from '../../../core/types/doma
 import { UserRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
+import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
@@ -81,49 +82,49 @@ export function CreateAppointmentScreen({ navigation }: Props) {
   return (
     <Screen loading={bootLoading}>
       <ScreenHeader
-        title="Book appointment"
-        subtitle="Creates a pending booking"
+        title={tr.createAppointment.title}
+        subtitle={tr.createAppointment.subtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.form}>
         <SelectField
-          label="Customer"
+          label={tr.createAppointment.customer}
           value={customerId}
           options={customers.map((c) => ({ id: c.id, label: c.full_name }))}
           onChange={setCustomerId}
-          empty="Add a customer user first (Users tab)."
+          empty={tr.createAppointment.customerEmpty}
         />
         <SelectField
-          label="Barber"
+          label={tr.createAppointment.barber}
           value={staffId}
           options={staff.map((s) => ({ id: s.id, label: s.display_name }))}
           onChange={setStaffId}
         />
         <SelectField
-          label="Service"
+          label={tr.createAppointment.service}
           value={serviceId}
           options={catalog.map((s) => ({
             id: s.id,
-            label: `${s.name} · ${s.duration_minutes}m`,
+            label: `${s.name} · ${tr.duration.minutes(s.duration_minutes)}`,
           }))}
           onChange={setServiceId}
         />
         <Input
-          label="Starts at (local)"
+          label={tr.createAppointment.startsAtLocal}
           value={startsAt}
           onChangeText={setStartsAt}
           placeholder="YYYY-MM-DDTHH:mm"
           autoCapitalize="none"
         />
         <Input
-          label="Notes"
+          label={tr.createAppointment.notes}
           value={notes}
           onChangeText={setNotes}
-          placeholder="Optional"
+          placeholder={tr.common.optional}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
-          label="Create booking"
+          label={tr.createAppointment.submit}
           onPress={onSubmit}
           loading={loading}
           disabled={!customerId || !staffId || !serviceId}
@@ -150,7 +151,7 @@ function SelectField({
     return (
       <View style={styles.select}>
         <Text style={styles.selectLabel}>{label}</Text>
-        <Text style={styles.empty}>{empty ?? 'Nothing available'}</Text>
+        <Text style={styles.empty}>{empty ?? tr.common.nothingAvailable}</Text>
       </View>
     );
   }

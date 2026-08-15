@@ -1,12 +1,12 @@
-const ink = '#111111';
-const paper = '#F5F3EF';
-const muted = '#6B6B6B';
-const line = '#E4E0D8';
-const accent = '#1C4A3E';
-const accentSoft = '#E8F0ED';
-const danger = '#8B2E2E';
-const warning = '#8A5A12';
-const success = '#1C4A3E';
+const ink = '#0A0A0A';
+const paper = '#FFFFFF';
+const muted = '#737373';
+const line = '#E5E5E5';
+const accent = '#0A0A0A';
+const accentSoft = '#F5F5F5';
+const danger = '#DC2626';
+const warning = '#A3A3A3';
+const success = '#16A34A';
 
 export const colors = {
   ink,
@@ -20,13 +20,15 @@ export const colors = {
   success,
   white: '#FFFFFF',
   surface: '#FFFFFF',
-  overlay: 'rgba(17, 17, 17, 0.45)',
+  overlay: 'rgba(10, 10, 10, 0.45)',
+  available: success,
+  unavailable: danger,
   status: {
-    pending: '#8A5A12',
-    confirmed: '#1C4A3E',
-    cancelled: '#8B2E2E',
-    completed: '#3D3D3D',
-    no_show: '#6B6B6B',
+    pending: '#525252',
+    confirmed: ink,
+    cancelled: danger,
+    completed: '#404040',
+    no_show: muted,
   },
 } as const;
 

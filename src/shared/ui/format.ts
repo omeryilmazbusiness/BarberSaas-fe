@@ -1,7 +1,9 @@
+import { tr } from '../i18n/tr';
+
 export function formatPrice(cents: number, currency: string): string {
   const amount = cents / 100;
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency,
       maximumFractionDigits: 0,
@@ -13,7 +15,7 @@ export function formatPrice(cents: number, currency: string): string {
 
 export function formatDateTime(iso: string, timeZone?: string): string {
   const date = new Date(iso);
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('tr-TR', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -25,16 +27,16 @@ export function formatDateTime(iso: string, timeZone?: string): string {
 
 export function formatDuration(minutes: number): string {
   if (minutes < 60) {
-    return `${minutes} min`;
+    return tr.duration.minutes(minutes);
   }
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  return m === 0 ? tr.duration.hours(h) : tr.duration.hoursMinutes(h, m);
 }
 
 export function errorMessage(err: unknown): string {
   if (err instanceof Error) {
     return err.message;
   }
-  return 'Something went wrong';
+  return tr.common.somethingWrong;
 }

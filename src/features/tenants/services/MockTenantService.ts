@@ -22,6 +22,15 @@ export class MockTenantService implements TenantService {
     return found;
   }
 
+  async getBySlug(slug: string): Promise<Tenant> {
+    await delay(150);
+    const found = tenants.find((t) => t.slug === slug.trim().toLowerCase());
+    if (!found) {
+      throw new Error('Berber bulunamadı');
+    }
+    return { ...found };
+  }
+
   async create(input: CreateShopInput): Promise<CreateShopResult> {
     await delay(400);
     const tenant: Tenant = {

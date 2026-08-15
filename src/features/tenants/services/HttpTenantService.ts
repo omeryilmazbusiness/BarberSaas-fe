@@ -18,6 +18,13 @@ export class HttpTenantService implements TenantService {
     });
   }
 
+  getBySlug(slug: string): Promise<Tenant> {
+    return this.http.request<Tenant>({
+      path: ApiPath.TenantBySlug(slug),
+      auth: false,
+    });
+  }
+
   create(input: CreateShopInput): Promise<CreateShopResult> {
     return this.http.request<CreateShopResult>({
       method: 'POST',
