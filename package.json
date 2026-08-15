@@ -36,7 +36,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo export --platform web",
-    "serve:web": "serve dist -s -l tcp://0.0.0.0:${PORT:-3000}",
+    "serve:web": "node ./scripts/serve-web.mjs",
     "typecheck": "tsc --noEmit"
   },
   "private": true
