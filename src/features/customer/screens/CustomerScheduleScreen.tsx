@@ -11,6 +11,7 @@ import { Screen } from '../../../shared/ui/Screen';
 import { errorMessage, formatPrice } from '../../../shared/ui/format';
 import { DayAccordion } from '../components/DayAccordion';
 import { useCustomerSession } from '../session/CustomerSessionContext';
+import { useCustomerShop } from '../session/CustomerShopContext';
 
 type Props = NativeStackScreenProps<
   CustomerStackParamList,
@@ -18,7 +19,8 @@ type Props = NativeStackScreenProps<
 >;
 
 export function CustomerScheduleScreen({ route, navigation }: Props) {
-  const { shopSlug, serviceId } = route.params;
+  const { serviceId } = route.params;
+  const { shopSlug } = useCustomerShop();
   const { services, session, selectedService, setSelectedService, isAuthenticated } =
     useCustomerSession();
   const [days, setDays] = useState<DayAvailability[]>([]);
@@ -30,9 +32,9 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigation.replace(CustomerRoute.Login, { shopSlug });
+      navigation.replace(CustomerRoute.Login);
     }
-  }, [isAuthenticated, navigation, shopSlug]);
+  }, [isAuthenticated, navigation]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -103,7 +105,6 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
         notes: `Tel: ${session.customer.phone ?? session.customer.email ?? ''}`,
       });
       navigation.replace(CustomerRoute.Success, {
-        shopSlug,
         appointmentId: appointment.id,
         startsAt: appointment.starts_at,
         serviceName: service?.name ?? tr.customer.serviceFallback,

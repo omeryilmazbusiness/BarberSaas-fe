@@ -46,6 +46,12 @@ export interface Appointment {
   notes: string;
 }
 
+/** Customer portal read model — includes display names from BE. */
+export interface CustomerAppointment extends Appointment {
+  service_name?: string;
+  staff_name?: string;
+}
+
 export interface AuthSession {
   access_token: string;
   token_type: string;
@@ -60,6 +66,20 @@ export interface CustomerProfile {
   phone?: string;
   email?: string;
   full_name?: string;
+}
+
+export interface CustomerPreferences {
+  preferred_service_ids: string[];
+  notes: string;
+  updated_at?: string;
+}
+
+export interface CustomerMe {
+  id: string;
+  phone?: string;
+  email?: string;
+  full_name?: string;
+  preferences: CustomerPreferences;
 }
 
 export interface CustomerSession {

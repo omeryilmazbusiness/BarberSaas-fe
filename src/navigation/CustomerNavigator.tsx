@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
@@ -11,7 +11,9 @@ import { CustomerLoginScreen } from '../features/customer/screens/CustomerLoginS
 import { CustomerServicesScreen } from '../features/customer/screens/CustomerServicesScreen';
 import { CustomerScheduleScreen } from '../features/customer/screens/CustomerScheduleScreen';
 import { CustomerSuccessScreen } from '../features/customer/screens/CustomerSuccessScreen';
+import { CustomerProfileScreen } from '../features/customer/screens/CustomerProfileScreen';
 import { useCustomerSession } from '../features/customer/session/CustomerSessionContext';
+import { CustomerShopProvider } from '../features/customer/session/CustomerShopContext';
 import type { CustomerStackParamList, RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<CustomerStackParamList>();
@@ -22,7 +24,7 @@ type PortalProps = NativeStackScreenProps<
 >;
 
 export function CustomerPortalScreen({ route }: PortalProps) {
-  const shopSlug = route.params?.shopSlug ?? 'acme-barber';
+  const shopSlug = route.params?.shopSlug?.trim() || 'acme-barber';
   const { isAuthenticated, isBootstrapping } = useCustomerSession();
 
   useEffect(() => {
@@ -31,57 +33,65 @@ export function CustomerPortalScreen({ route }: PortalProps) {
     }
   }, [isAuthenticated]);
 
-  if (isBootstrapping) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: colors.paper,
-        }}
-      >
-        <ActivityIndicator size="large" color={colors.ink} />
-      </View>
-    );
-  }
-
   return (
-    <Stack.Navigator
-      initialRouteName={
-        isAuthenticated ? CustomerRoute.Services : CustomerRoute.Login
-      }
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.paper },
-        animation: 'fade',
-      }}
-    >
-      <Stack.Screen
-        name={CustomerRoute.Login}
-        component={CustomerLoginScreen}
-        initialParams={{ shopSlug }}
-      />
-      <Stack.Screen
-        name={CustomerRoute.Services}
-        component={CustomerServicesScreen}
-        initialParams={{ shopSlug }}
-      />
-      <Stack.Screen
-        name={CustomerRoute.Schedule}
-        component={CustomerScheduleScreen}
-        initialParams={{ shopSlug, serviceId: '' }}
-      />
-      <Stack.Screen
-        name={CustomerRoute.Success}
-        component={CustomerSuccessScreen}
-        initialParams={{
-          shopSlug,
-          appointmentId: '',
-          startsAt: new Date().toISOString(),
-          serviceName: '',
-        }}
-      />
-    </Stack.Navigator>
+    <CustomerShopProvider shopSlug={shopSlug}>
+      <View style={styles.root}>
+        {isBootstrapping ? (
+          <View style={styles.boot}>
+            <ActivityIndicator size="large" color={colors.ink} />
+          </View>
+        ) : null}
+        <Stack.Navigator
+          initialRouteName={
+            isAuthenticated ? CustomerRoute.Services : CustomerRoute.Login
+          }
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.paper },
+            animation: 'fade',
+          }}
+        >
+          <Stack.Screen
+            name={CustomerRoute.Login}
+            component={CustomerLoginScreen}
+          />
+          <Stack.Screen
+            name={CustomerRoute.Services}
+            component={CustomerServicesScreen}
+          />
+          <Stack.Screen
+            name={CustomerRoute.Schedule}
+            component={CustomerScheduleScreen}
+            initialParams={{ serviceId: '' }}
+          />
+          <Stack.Screen
+            name={CustomerRoute.Success}
+            component={CustomerSuccessScreen}
+            initialParams={{
+              appointmentId: '',
+              startsAt: new Date().toISOString(),
+              serviceName: '',
+            }}
+          />
+          <Stack.Screen
+            name={CustomerRoute.Profile}
+            component={CustomerProfileScreen}
+          />
+        </Stack.Navigator>
+      </View>
+    </CustomerShopProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  boot: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.paper,
+  },
+});

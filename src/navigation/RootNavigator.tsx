@@ -38,7 +38,10 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer
+      linking={linking}
+      documentTitle={{ formatter: () => 'BarberSaas' }}
+    >
       <Stack.Navigator
         initialRouteName={StackRoute.AdminLogin}
         screenOptions={{

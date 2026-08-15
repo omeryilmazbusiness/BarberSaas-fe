@@ -7,6 +7,8 @@ export const ApiPath = {
   CustomersRegister: '/customers/register',
   CustomerLogin: '/customers/login',
   CustomerGoogleLogin: '/customers/login/google',
+  CustomerMe: '/customers/me',
+  CustomerAppointments: '/customers/me/appointments',
   TenantBySlug: (slug: string) => `/tenants/by-slug/${slug}`,
   Availability: '/availability',
   Users: '/users',

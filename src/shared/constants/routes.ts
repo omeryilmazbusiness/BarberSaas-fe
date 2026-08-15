@@ -28,6 +28,7 @@ export const CustomerRoute = {
   Services: 'CustomerServices',
   Schedule: 'CustomerSchedule',
   Success: 'CustomerSuccess',
+  Profile: 'CustomerProfile',
 } as const;
 
 export type AuthRoute = (typeof AuthRoute)[keyof typeof AuthRoute];

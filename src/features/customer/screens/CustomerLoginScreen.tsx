@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,33 +18,54 @@ import { Input } from '../../../shared/ui/Input';
 import { Screen } from '../../../shared/ui/Screen';
 import { errorMessage } from '../../../shared/ui/format';
 import { useCustomerSession } from '../session/CustomerSessionContext';
+import { useCustomerShop } from '../session/CustomerShopContext';
 
 type Props = NativeStackScreenProps<
   CustomerStackParamList,
   typeof CustomerRoute.Login
 >;
 
-export function CustomerLoginScreen({ route, navigation }: Props) {
-  const shopSlug = route.params.shopSlug;
+export function CustomerLoginScreen({ navigation }: Props) {
+  const { shopSlug } = useCustomerShop();
   const { loginWithPhone, loginWithGoogle, services, isAuthenticated } =
     useCustomerSession();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shopName, setShopName] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
-      navigation.replace(CustomerRoute.Services, { shopSlug });
+      navigation.replace(CustomerRoute.Services);
     }
-  }, [isAuthenticated, navigation, shopSlug]);
+  }, [isAuthenticated, navigation]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const tenant = await services.tenants.getBySlug(shopSlug);
+        if (!cancelled) {
+          setShopName(tenant.name);
+        }
+      } catch {
+        if (!cancelled) {
+          setShopName(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [services.tenants, shopSlug]);
 
   const onSubmit = async () => {
     setError(null);
     setLoading(true);
     try {
       await loginWithPhone(shopSlug, phone);
-      navigation.replace(CustomerRoute.Services, { shopSlug });
+      navigation.replace(CustomerRoute.Services);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -61,7 +82,7 @@ export function CustomerLoginScreen({ route, navigation }: Props) {
     setGoogleLoading(true);
     try {
       await loginWithGoogle(shopSlug);
-      navigation.replace(CustomerRoute.Services, { shopSlug });
+      navigation.replace(CustomerRoute.Services);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -76,7 +97,9 @@ export function CustomerLoginScreen({ route, navigation }: Props) {
         style={styles.wrap}
       >
         <View style={styles.hero}>
-          <Text style={styles.eyebrow}>{shopSlug}</Text>
+          {shopName ? (
+            <Text style={styles.eyebrow}>{shopName}</Text>
+          ) : null}
           <Text style={styles.title}>{tr.customer.loginTitle}</Text>
           <Text style={styles.subtitle}>{tr.customer.loginSubtitle}</Text>
         </View>

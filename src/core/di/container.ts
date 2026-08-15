@@ -28,6 +28,12 @@ import { MockAvailabilityService } from '../../features/customer/services/MockAv
 import type { GoogleSignInService } from '../../features/customer/services/GoogleSignInService';
 import { ExpoGoogleSignInService } from '../../features/customer/services/ExpoGoogleSignInService';
 import { MockGoogleSignInService } from '../../features/customer/services/MockGoogleSignInService';
+import type { CustomerProfileService } from '../../features/customer/services/CustomerProfileService';
+import { HttpCustomerProfileService } from '../../features/customer/services/HttpCustomerProfileService';
+import { MockCustomerProfileService } from '../../features/customer/services/MockCustomerProfileService';
+import type { CustomerAppointmentService } from '../../features/customer/services/CustomerAppointmentService';
+import { HttpCustomerAppointmentService } from '../../features/customer/services/HttpCustomerAppointmentService';
+import { MockCustomerAppointmentService } from '../../features/customer/services/MockCustomerAppointmentService';
 
 /**
  * Composition root — single place that wires concrete adapters.
@@ -36,6 +42,8 @@ import { MockGoogleSignInService } from '../../features/customer/services/MockGo
 export interface AppServices {
   auth: AuthService;
   customerAuth: CustomerAuthService;
+  customerProfile: CustomerProfileService;
+  customerAppointments: CustomerAppointmentService;
   googleSignIn: GoogleSignInService;
   availability: AvailabilityService;
   tenants: TenantService;
@@ -51,6 +59,8 @@ function createHttpServices(): AppServices {
   return {
     auth: new HttpAuthService(http),
     customerAuth: new HttpCustomerAuthService(http),
+    customerProfile: new HttpCustomerProfileService(http),
+    customerAppointments: new HttpCustomerAppointmentService(http),
     googleSignIn: new ExpoGoogleSignInService(),
     availability: new HttpAvailabilityService(http),
     tenants: new HttpTenantService(http),
@@ -66,6 +76,8 @@ function createMockServices(): AppServices {
   return {
     auth: new MockAuthService(),
     customerAuth: new MockCustomerAuthService(),
+    customerProfile: new MockCustomerProfileService(),
+    customerAppointments: new MockCustomerAppointmentService(),
     googleSignIn: new MockGoogleSignInService(),
     availability: new MockAvailabilityService(),
     tenants: new MockTenantService(),

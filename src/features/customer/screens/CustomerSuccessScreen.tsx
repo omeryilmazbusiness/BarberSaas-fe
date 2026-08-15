@@ -5,7 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CustomerRoute } from '../../../shared/constants/routes';
 import type { CustomerStackParamList } from '../../../navigation/types';
 import { tr } from '../../../shared/i18n/tr';
-import { colors, spacing, typography } from '../../../shared/theme';
+import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Screen } from '../../../shared/ui/Screen';
 import { formatBookingWhen } from '../utils/format';
@@ -16,7 +16,7 @@ type Props = NativeStackScreenProps<
 >;
 
 export function CustomerSuccessScreen({ route, navigation }: Props) {
-  const { shopSlug, serviceName, startsAt } = route.params;
+  const { serviceName, startsAt } = route.params;
 
   return (
     <Screen scroll padded>
@@ -29,13 +29,11 @@ export function CustomerSuccessScreen({ route, navigation }: Props) {
         <Text style={styles.when}>{formatBookingWhen(startsAt)}</Text>
 
         <Text style={styles.cancelNote}>{tr.customer.cancelPolicy}</Text>
+        <Text style={styles.hint}>{tr.customer.successDoneHint}</Text>
 
         <Button
-          label={tr.customer.newBooking}
-          variant="secondary"
-          onPress={() =>
-            navigation.replace(CustomerRoute.Services, { shopSlug })
-          }
+          label={tr.customer.done}
+          onPress={() => navigation.replace(CustomerRoute.Profile)}
         />
       </View>
     </Screen>
@@ -71,12 +69,17 @@ const styles = StyleSheet.create({
   },
   cancelNote: {
     ...typography.caption,
-    marginVertical: spacing.md,
+    marginTop: spacing.md,
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 10,
+    borderRadius: radius.md,
     color: colors.ink,
+    lineHeight: 18,
+  },
+  hint: {
+    ...typography.caption,
+    marginBottom: spacing.sm,
     lineHeight: 18,
   },
 });

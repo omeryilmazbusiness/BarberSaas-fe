@@ -19,15 +19,15 @@ export type ShopTabParamList = {
 };
 
 export type CustomerStackParamList = {
-  [CustomerRoute.Login]: { shopSlug: string };
-  [CustomerRoute.Services]: { shopSlug: string };
-  [CustomerRoute.Schedule]: { shopSlug: string; serviceId: string };
+  [CustomerRoute.Login]: undefined;
+  [CustomerRoute.Services]: undefined;
+  [CustomerRoute.Schedule]: { serviceId: string };
   [CustomerRoute.Success]: {
-    shopSlug: string;
     appointmentId: string;
     startsAt: string;
     serviceName: string;
   };
+  [CustomerRoute.Profile]: undefined;
 };
 
 export type RootStackParamList = {
