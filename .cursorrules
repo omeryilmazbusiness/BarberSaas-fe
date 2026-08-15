@@ -1,0 +1,32 @@
+# Barber SaaS — Frontend Cursor Rules
+
+Multi-tenant, mobile-first barber appointment and management UI.
+Stack: React Native (Expo, TypeScript) · Web via react-native-web.
+
+## General
+
+- Prefer clear, descriptive English names for packages, files, types, functions, and variables.
+- Avoid magic strings and magic numbers; use named constants, enums, or typed config.
+- Do not invent scope: implement only what was requested; no drive-by refactors.
+- Keep comments sparse and only for non-obvious intent.
+- Multi-tenancy is a hard invariant: tenant context comes from JWT after login.
+
+## TypeScript / React Native
+
+- TypeScript strict mode is mandatory (`strict: true`).
+- `any` is forbidden. Use `unknown` and narrow, or define precise types/interfaces.
+- Prefer feature-based modules under `src/features/*`; shared UI/utilities under `src/shared` or `src/core`.
+- Keep API clients, auth, and tenant context in core layers; features consume them through typed interfaces.
+- Avoid magic strings for routes, storage keys, and status values; centralize constants or typed unions.
+
+## Architecture & SOLID
+
+- Depend on interfaces, not concrete HTTP/mock implementations.
+- Wire dependencies in `src/core/di` (composition root).
+- Feature screens must not construct API clients ad hoc.
+- Services live behind interfaces so mock ↔ HTTP can swap without touching UI.
+
+## Naming
+
+- TypeScript: PascalCase for types/components; camelCase for values/functions.
+- Replace literals like `"pending"`, `"/api/v1"` with named constants or typed enums where reused.
