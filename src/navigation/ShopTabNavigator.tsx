@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ShopTabRoute } from '../shared/constants/routes';
@@ -14,6 +13,7 @@ import { colors } from '../shared/theme';
 import { useAuth } from '../core/auth/AuthContext';
 import { authPortal } from '../core/auth/tokenProvider';
 import { isAdminRole } from '../shared/constants/roles';
+import { GlassTabBar } from './GlassTabBar';
 
 const Tab = createBottomTabNavigator<ShopTabParamList>();
 
@@ -27,22 +27,13 @@ export function ShopTabNavigator() {
 
   return (
     <Tab.Navigator
+      tabBar={(props) => <GlassTabBar {...props} />}
       screenOptions={({ route }) => ({
         headerShown: false,
         title: tr.tabs[route.name as keyof typeof tr.tabs] ?? route.name,
         tabBarLabel: tr.tabs[route.name as keyof typeof tr.tabs] ?? route.name,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.line,
-          height: Platform.OS === 'web' ? 64 : undefined,
-          paddingTop: 6,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        },
         tabBarIcon: ({ color, size }) => {
           const icon = iconForRoute(route.name);
           return <Ionicons name={icon} size={size} color={color} />;
@@ -50,7 +41,10 @@ export function ShopTabNavigator() {
       })}
     >
       <Tab.Screen name={ShopTabRoute.Home} component={HomeScreen} />
-      <Tab.Screen name={ShopTabRoute.Appointments} component={AppointmentsScreen} />
+      <Tab.Screen
+        name={ShopTabRoute.Appointments}
+        component={AppointmentsScreen}
+      />
       <Tab.Screen name={ShopTabRoute.Staff} component={StaffScreen} />
       <Tab.Screen name={ShopTabRoute.Services} component={ServicesScreen} />
       {showUsers ? (

@@ -94,6 +94,38 @@ export class MockAppointmentService implements AppointmentService {
     item.status = AppointmentStatus.Cancelled;
     return { ...item };
   }
+
+  async complete(id: string): Promise<Appointment> {
+    await delay(250);
+    const item = appointments.find((a) => a.id === id);
+    if (!item) {
+      throw new Error('Appointment not found');
+    }
+    if (
+      item.status !== AppointmentStatus.Pending &&
+      item.status !== AppointmentStatus.Confirmed
+    ) {
+      throw new Error('Only active appointments can be completed');
+    }
+    item.status = AppointmentStatus.Completed;
+    return { ...item };
+  }
+
+  async markNoShow(id: string): Promise<Appointment> {
+    await delay(250);
+    const item = appointments.find((a) => a.id === id);
+    if (!item) {
+      throw new Error('Appointment not found');
+    }
+    if (
+      item.status !== AppointmentStatus.Pending &&
+      item.status !== AppointmentStatus.Confirmed
+    ) {
+      throw new Error('Only active appointments can be marked no-show');
+    }
+    item.status = AppointmentStatus.NoShow;
+    return { ...item };
+  }
 }
 
 function delay(ms: number): Promise<void> {

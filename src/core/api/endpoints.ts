@@ -10,6 +10,8 @@ export const ApiPath = {
   CustomerMe: '/customers/me',
   CustomerAppointments: '/customers/me/appointments',
   TenantBySlug: (slug: string) => `/tenants/by-slug/${slug}`,
+  TenantMe: '/tenants/me',
+  TenantWorkingHours: '/tenants/me/working-hours',
   Availability: '/availability',
   Users: '/users',
   Staff: '/staff',
@@ -17,6 +19,8 @@ export const ApiPath = {
   Appointments: '/appointments',
   ConfirmAppointment: (id: string) => `/appointments/${id}/confirm`,
   CancelAppointment: (id: string) => `/appointments/${id}/cancel`,
+  CompleteAppointment: (id: string) => `/appointments/${id}/complete`,
+  NoShowAppointment: (id: string) => `/appointments/${id}/no-show`,
 } as const;
 
 export const HeaderName = {

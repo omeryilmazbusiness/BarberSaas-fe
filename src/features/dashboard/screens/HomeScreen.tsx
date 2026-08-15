@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
+import { setPendingManagerLogin } from '../../../core/auth/pendingManagerLogin';
 import { isAdminRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
@@ -12,12 +13,19 @@ import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
 import { Button } from '../../../shared/ui/Button';
+import { needsShopSetup } from '../../tenants/setup/shopSetup';
+import { roleLabel } from '../../../shared/ui/roleLabel';
 
 interface QuickAction {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   hint: string;
-  route: typeof StackRoute.CreateAppointment | typeof StackRoute.CreateStaff | typeof StackRoute.CreateService | typeof StackRoute.CreateUser;
+  route:
+    | typeof StackRoute.CreateAppointment
+    | typeof StackRoute.CreateStaff
+    | typeof StackRoute.CreateService
+    | typeof StackRoute.CreateUser
+    | typeof StackRoute.ShopSettings;
   adminOnly?: boolean;
 }
 
@@ -27,6 +35,13 @@ const actions: QuickAction[] = [
     label: tr.home.book,
     hint: tr.home.bookHint,
     route: StackRoute.CreateAppointment,
+  },
+  {
+    icon: 'time-outline',
+    label: tr.home.workingHours,
+    hint: tr.home.workingHoursHint,
+    route: StackRoute.ShopSettings,
+    adminOnly: true,
   },
   {
     icon: 'person-add-outline',
@@ -60,6 +75,7 @@ export function HomeScreen() {
     staff: 0,
     services: 0,
   });
+  const [setupNeeded, setSetupNeeded] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -71,16 +87,26 @@ export function HomeScreen() {
           services.catalog.list(),
         ]);
         if (!active) return;
+        const bookable = staff.filter((s) => s.is_bookable).length;
+        const serviceCount = catalog.filter((s) => s.is_active !== false).length;
         setCounts({
-          appointments: appointments.filter((a) => a.status !== 'cancelled').length,
-          staff: staff.filter((s) => s.is_bookable).length,
-          services: catalog.length,
+          appointments: appointments.filter((a) => a.status !== 'cancelled')
+            .length,
+          staff: bookable,
+          services: serviceCount,
         });
+        setSetupNeeded(
+          Boolean(user && isAdminRole(user.role)) &&
+            needsShopSetup({
+              bookableStaff: bookable,
+              services: serviceCount,
+            }),
+        );
       })().catch(() => undefined);
       return () => {
         active = false;
       };
-    }, [services]),
+    }, [services, user]),
   );
 
   const visibleActions = actions.filter(
@@ -88,21 +114,54 @@ export function HomeScreen() {
   );
 
   return (
-    <Screen>
+    <Screen tabInset>
       <ScreenHeader
-        title={tenant?.name ?? tr.common.shop}
-        subtitle={user ? `${user.full_name} · ${user.role}` : undefined}
+        subtitle={
+          user ? `${user.full_name} · ${roleLabel(user.role)}` : undefined
+        }
         rightAction={
-          <Pressable onPress={logout} style={styles.logout} accessibilityLabel={tr.common.signOut}>
+          <Pressable
+            onPress={async () => {
+              const slug = tenant?.slug;
+              if (slug) {
+                setPendingManagerLogin(slug);
+              }
+              await logout();
+            }}
+            style={styles.logout}
+            accessibilityLabel={tr.common.signOut}
+          >
             <Ionicons name="log-out-outline" size={20} color={colors.ink} />
           </Pressable>
         }
       />
 
+      {setupNeeded ? (
+        <View style={styles.setupCard}>
+          <View style={styles.setupIcon}>
+            <Ionicons name="rocket-outline" size={22} color={colors.accent} />
+          </View>
+          <Text style={styles.setupTitle}>{tr.home.setupBannerTitle}</Text>
+          <Text style={styles.setupBody}>{tr.home.setupBannerBody}</Text>
+          <Button
+            label={tr.home.setupBannerCta}
+            onPress={() => navigation.navigate(StackRoute.ShopSetup)}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.metrics}>
-        <Metric icon="calendar" label={tr.home.bookings} value={String(counts.appointments)} />
+        <Metric
+          icon="calendar"
+          label={tr.home.bookings}
+          value={String(counts.appointments)}
+        />
         <Metric icon="cut" label={tr.home.staff} value={String(counts.staff)} />
-        <Metric icon="pricetag" label={tr.home.services} value={String(counts.services)} />
+        <Metric
+          icon="pricetag"
+          label={tr.home.services}
+          value={String(counts.services)}
+        />
       </View>
 
       <Text style={styles.section}>{tr.home.today}</Text>
@@ -127,7 +186,8 @@ export function HomeScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          {tr.common.shop} · {tenant?.slug} · {tenant?.status} · {tenant?.timezone}
+          {tr.common.shop} · {tenant?.slug} · {tenant?.open_time ?? '09:00'}–
+          {tenant?.close_time ?? '18:00'} · {tenant?.slot_minutes ?? 30} dk
         </Text>
         {services.useMockApi ? (
           <Button
@@ -170,6 +230,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surface,
+  },
+  setupCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    borderColor: colors.ink,
+    padding: spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  setupIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
+  },
+  setupTitle: {
+    ...typography.title,
+    fontSize: 20,
+  },
+  setupBody: {
+    ...typography.body,
+    color: colors.muted,
+    marginBottom: spacing.sm,
   },
   metrics: {
     flexDirection: 'row',

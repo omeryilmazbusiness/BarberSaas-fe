@@ -7,12 +7,20 @@ export interface Tenant {
   name: string;
   status: TenantStatus;
   timezone: string;
+  /** Shop open clock HH:MM (local tenant day). */
+  open_time?: string;
+  /** Shop close clock HH:MM (local tenant day). */
+  close_time?: string;
+  /** Minutes between bookable start times. */
+  slot_minutes?: number;
+  created_at?: string;
 }
 
 export interface User {
   id: string;
   tenant_id: string;
   email: string;
+  phone?: string;
   full_name: string;
   role: UserRole;
   is_active?: boolean;

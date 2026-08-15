@@ -3,7 +3,7 @@ import { TenantStatus } from '../../../shared/constants/statuses';
 import type { Tenant, User } from '../../../core/types/domain';
 import type { CreateShopInput, CreateShopResult } from '../../auth/services/AuthService';
 import { mockAuthFixtures } from '../../auth/services/MockAuthService';
-import type { TenantService } from './TenantService';
+import type { TenantService, UpdateWorkingHoursInput } from './TenantService';
 
 const tenants: Tenant[] = [mockAuthFixtures.mockTenant];
 
@@ -39,6 +39,10 @@ export class MockTenantService implements TenantService {
       name: input.name,
       status: TenantStatus.Trial,
       timezone: input.timezone || 'UTC',
+      open_time: '09:00',
+      close_time: '18:00',
+      slot_minutes: 30,
+      created_at: new Date().toISOString(),
     };
     const owner: User = {
       id: cryptoRandom(),
@@ -50,6 +54,25 @@ export class MockTenantService implements TenantService {
     };
     tenants.unshift(tenant);
     return { tenant, owner };
+  }
+
+  async getMe(): Promise<Tenant> {
+    await delay(120);
+    return { ...tenants[0] };
+  }
+
+  async updateWorkingHours(input: UpdateWorkingHoursInput): Promise<Tenant> {
+    await delay(250);
+    tenants[0] = {
+      ...tenants[0],
+      open_time: input.open_time,
+      close_time: input.close_time,
+      slot_minutes: input.slot_minutes,
+    };
+    mockAuthFixtures.mockTenant.open_time = input.open_time;
+    mockAuthFixtures.mockTenant.close_time = input.close_time;
+    mockAuthFixtures.mockTenant.slot_minutes = input.slot_minutes;
+    return { ...tenants[0] };
   }
 }
 

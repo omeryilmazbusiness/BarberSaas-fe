@@ -10,7 +10,10 @@ import { tr } from '../../../shared/i18n/tr';
 import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Screen } from '../../../shared/ui/Screen';
-import { errorMessage } from '../../../shared/ui/format';
+import {
+  errorMessage,
+  formatPrice,
+} from '../../../shared/ui/format';
 import { ServiceCard } from '../components/ServiceCard';
 import { useCustomerSession } from '../session/CustomerSessionContext';
 import { useCustomerShop } from '../session/CustomerShopContext';
@@ -25,8 +28,9 @@ export function CustomerServicesScreen({ navigation }: Props) {
   const {
     services,
     session,
-    selectedService,
-    setSelectedService,
+    selectedServices,
+    setSelectedServices,
+    toggleSelectedService,
     isAuthenticated,
   } = useCustomerSession();
   const [items, setItems] = useState<CatalogService[]>([]);
@@ -71,32 +75,44 @@ export function CustomerServicesScreen({ navigation }: Props) {
     }, [isAuthenticated, load]),
   );
 
-  const usualService = useMemo(() => {
+  const usualServices = useMemo(() => {
     if (preferredIds.length === 0) {
-      return null;
+      return [];
     }
-    return items.find((s) => s.id === preferredIds[0]) ?? null;
+    return preferredIds
+      .map((id) => items.find((s) => s.id === id))
+      .filter((s): s is CatalogService => Boolean(s));
   }, [items, preferredIds]);
 
-  const goSchedule = (service: CatalogService) => {
-    setSelectedService(service);
+  const totals = useMemo(() => {
+    const minutes = selectedServices.reduce(
+      (sum, s) => sum + s.duration_minutes,
+      0,
+    );
+    const cents = selectedServices.reduce((sum, s) => sum + s.price_cents, 0);
+    const currency = selectedServices[0]?.currency ?? 'TRY';
+    return { minutes, cents, currency };
+  }, [selectedServices]);
+
+  const goSchedule = (picked: CatalogService[]) => {
+    if (picked.length === 0) {
+      return;
+    }
+    setSelectedServices(picked);
     navigation.navigate(CustomerRoute.Schedule, {
-      serviceId: service.id,
+      serviceIds: picked.map((s) => s.id).join(','),
     });
   };
 
   const onContinue = () => {
-    if (!selectedService) {
-      return;
-    }
-    goSchedule(selectedService);
+    goSchedule(selectedServices);
   };
 
   const onUsual = () => {
-    if (!usualService) {
+    if (usualServices.length === 0) {
       return;
     }
-    goSchedule(usualService);
+    goSchedule(usualServices);
   };
 
   if (!isAuthenticated) {
@@ -115,9 +131,7 @@ export function CustomerServicesScreen({ navigation }: Props) {
           </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() =>
-              navigation.navigate(CustomerRoute.Profile)
-            }
+            onPress={() => navigation.navigate(CustomerRoute.Profile)}
             style={({ pressed }) => [
               styles.profileBtn,
               pressed && styles.pressed,
@@ -128,9 +142,10 @@ export function CustomerServicesScreen({ navigation }: Props) {
           </Pressable>
         </View>
         <Text style={styles.subtitle}>{tr.customer.servicesSubtitle}</Text>
+        <Text style={styles.hint}>{tr.customer.servicesSelectHint}</Text>
       </View>
 
-      {usualService ? (
+      {usualServices.length > 0 ? (
         <View style={styles.usualBlock}>
           <Button label={tr.customer.usualCta} onPress={onUsual} />
           <Text style={styles.usualHint}>
@@ -141,9 +156,7 @@ export function CustomerServicesScreen({ navigation }: Props) {
       ) : (
         <Pressable
           accessibilityRole="button"
-          onPress={() =>
-            navigation.navigate(CustomerRoute.Profile)
-          }
+          onPress={() => navigation.navigate(CustomerRoute.Profile)}
           style={({ pressed }) => [
             styles.setupCard,
             pressed && styles.pressed,
@@ -164,17 +177,26 @@ export function CustomerServicesScreen({ navigation }: Props) {
           <ServiceCard
             key={service.id}
             service={service}
-            selected={selectedService?.id === service.id}
-            onPress={() => setSelectedService(service)}
+            selected={selectedServices.some((s) => s.id === service.id)}
+            onPress={() => toggleSelectedService(service)}
           />
         ))}
       </View>
 
       <View style={styles.footer}>
+        {selectedServices.length > 0 ? (
+          <Text style={styles.summary}>
+            {tr.customer.servicesSelected(
+              selectedServices.length,
+              totals.minutes,
+              formatPrice(totals.cents, totals.currency),
+            )}
+          </Text>
+        ) : null}
         <Button
           label={tr.common.continue}
           onPress={onContinue}
-          disabled={!selectedService}
+          disabled={selectedServices.length === 0}
         />
       </View>
     </Screen>
@@ -226,6 +248,9 @@ const styles = StyleSheet.create({
   subtitle: {
     ...typography.subtitle,
   },
+  hint: {
+    ...typography.caption,
+  },
   usualBlock: {
     gap: spacing.sm,
     marginBottom: spacing.lg,
@@ -263,6 +288,11 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: spacing.xl,
     paddingBottom: spacing.lg,
+    gap: spacing.sm,
+  },
+  summary: {
+    ...typography.label,
+    textAlign: 'center',
   },
   error: {
     ...typography.caption,

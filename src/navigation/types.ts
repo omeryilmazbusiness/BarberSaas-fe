@@ -21,7 +21,7 @@ export type ShopTabParamList = {
 export type CustomerStackParamList = {
   [CustomerRoute.Login]: undefined;
   [CustomerRoute.Services]: undefined;
-  [CustomerRoute.Schedule]: { serviceId: string };
+  [CustomerRoute.Schedule]: { serviceIds: string };
   [CustomerRoute.Success]: {
     appointmentId: string;
     startsAt: string;
@@ -31,7 +31,9 @@ export type CustomerStackParamList = {
 };
 
 export type RootStackParamList = {
+  [StackRoute.ShopDirectory]: undefined;
   [StackRoute.AdminLogin]: undefined;
+  [StackRoute.Admin]: undefined;
   [StackRoute.ManagerLogin]: { shopSlug: string };
   [StackRoute.Customer]: {
     shopSlug: string;
@@ -41,7 +43,10 @@ export type RootStackParamList = {
   [StackRoute.Auth]: undefined;
   [StackRoute.Shop]: undefined;
   [StackRoute.CreateAppointment]: undefined;
+  [StackRoute.AppointmentDetail]: { appointmentId: string };
   [StackRoute.CreateStaff]: undefined;
   [StackRoute.CreateService]: undefined;
   [StackRoute.CreateUser]: undefined;
+  [StackRoute.ShopSettings]: undefined;
+  [StackRoute.ShopSetup]: undefined;
 };

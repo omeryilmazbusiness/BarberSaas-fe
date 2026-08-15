@@ -1,16 +1,21 @@
 import type { ComponentProps } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { serviceBarberIcon } from '../../../shared/ui/serviceIcon';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
-const SERVICE_ICONS: Record<string, IconName> = {
+const NAMED_SERVICE_ICONS: Record<string, IconName> = {
   'classic haircut': 'cut-outline',
   'beard trim': 'man-outline',
   'cut + beard': 'sparkles-outline',
 };
 
-export function serviceIcon(name: string): IconName {
-  return SERVICE_ICONS[name.trim().toLowerCase()] ?? 'scissors-outline';
+export function serviceIcon(name: string, id?: string): IconName {
+  const known = NAMED_SERVICE_ICONS[name.trim().toLowerCase()];
+  if (known) {
+    return known;
+  }
+  return serviceBarberIcon(id || name);
 }
 
 export function formatPhoneDisplay(digits: string): string {

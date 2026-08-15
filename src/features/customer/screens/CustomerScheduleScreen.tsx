@@ -1,14 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { DayAvailability, TimeSlot } from '../../../core/types/domain';
+import type {
+  CatalogService,
+  DayAvailability,
+  TimeSlot,
+} from '../../../core/types/domain';
 import { CustomerRoute } from '../../../shared/constants/routes';
 import type { CustomerStackParamList } from '../../../navigation/types';
 import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Screen } from '../../../shared/ui/Screen';
-import { errorMessage, formatPrice } from '../../../shared/ui/format';
+import {
+  errorMessage,
+  formatDuration,
+  formatPrice,
+} from '../../../shared/ui/format';
 import { DayAccordion } from '../components/DayAccordion';
 import { useCustomerSession } from '../session/CustomerSessionContext';
 import { useCustomerShop } from '../session/CustomerShopContext';
@@ -18,11 +26,28 @@ type Props = NativeStackScreenProps<
   typeof CustomerRoute.Schedule
 >;
 
+function parseServiceIds(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
 export function CustomerScheduleScreen({ route, navigation }: Props) {
-  const { serviceId } = route.params;
+  const serviceIds = useMemo(
+    () => parseServiceIds(route.params.serviceIds ?? ''),
+    [route.params.serviceIds],
+  );
+  const primaryServiceId = serviceIds[0] ?? '';
   const { shopSlug } = useCustomerShop();
-  const { services, session, selectedService, setSelectedService, isAuthenticated } =
-    useCustomerSession();
+  const {
+    services,
+    session,
+    selectedServices,
+    setSelectedServices,
+    isAuthenticated,
+  } = useCustomerSession();
+  const [bundle, setBundle] = useState<CatalogService[]>(selectedServices);
   const [days, setDays] = useState<DayAvailability[]>([]);
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -36,18 +61,46 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
     }
   }, [isAuthenticated, navigation]);
 
+  const totals = useMemo(() => {
+    const minutes = bundle.reduce((sum, s) => sum + s.duration_minutes, 0);
+    const cents = bundle.reduce((sum, s) => sum + s.price_cents, 0);
+    const currency = bundle[0]?.currency ?? 'TRY';
+    const names = bundle.map((s) => s.name).join(' + ');
+    return { minutes: Math.max(minutes, 5), cents, currency, names };
+  }, [bundle]);
+
   const load = useCallback(async () => {
+    if (!primaryServiceId) {
+      setError(tr.customer.serviceMissing);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      if (!selectedService || selectedService.id !== serviceId) {
+      let nextBundle = selectedServices.filter((s) =>
+        serviceIds.includes(s.id),
+      );
+      if (
+        nextBundle.length !== serviceIds.length ||
+        nextBundle.length === 0
+      ) {
         const catalog = await services.catalog.list();
-        const found = catalog.find((s) => s.id === serviceId) ?? null;
-        setSelectedService(found);
+        nextBundle = serviceIds
+          .map((id) => catalog.find((s) => s.id === id))
+          .filter((s): s is CatalogService => Boolean(s));
+        setSelectedServices(nextBundle);
       }
+      setBundle(nextBundle);
+
+      const durationMinutes = Math.max(
+        5,
+        nextBundle.reduce((sum, s) => sum + s.duration_minutes, 0),
+      );
       const week = await services.availability.getWeek({
         shop_slug: shopSlug,
-        service_id: serviceId,
+        service_id: primaryServiceId,
+        duration_minutes: durationMinutes,
         days: 7,
       });
       setDays(week);
@@ -58,12 +111,13 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
       setLoading(false);
     }
   }, [
-    selectedService,
-    serviceId,
+    primaryServiceId,
+    selectedServices,
+    serviceIds,
     services.catalog,
     services.availability,
     shopSlug,
-    setSelectedService,
+    setSelectedServices,
   ]);
 
   useEffect(() => {
@@ -78,7 +132,7 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
   };
 
   const onBook = async () => {
-    if (!session || !selectedSlot) {
+    if (!session || !selectedSlot || !primaryServiceId || bundle.length === 0) {
       return;
     }
     setSubmitting(true);
@@ -89,25 +143,31 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
       if (!bookable) {
         throw new Error(tr.customer.noBookableStaff);
       }
-      const service =
-        selectedService ??
-        (await services.catalog.list()).find((s) => s.id === serviceId);
-      const duration = service?.duration_minutes ?? 30;
       const ends = new Date(
-        new Date(selectedSlot.starts_at).getTime() + duration * 60 * 1000,
+        new Date(selectedSlot.starts_at).getTime() +
+          totals.minutes * 60 * 1000,
       );
+      const contact = session.customer.phone ?? session.customer.email ?? '';
+      const servicesNote =
+        bundle.length > 1
+          ? `Hizmetler: ${bundle.map((s) => s.name).join(', ')}`
+          : '';
+      const notes = [contact ? `Tel: ${contact}` : '', servicesNote]
+        .filter(Boolean)
+        .join(' · ');
+
       const appointment = await services.appointments.create({
         customer_id: session.customer.id,
         staff_id: bookable.id,
-        service_id: serviceId,
+        service_id: primaryServiceId,
         starts_at: selectedSlot.starts_at,
         ends_at: ends.toISOString(),
-        notes: `Tel: ${session.customer.phone ?? session.customer.email ?? ''}`,
+        notes: notes || undefined,
       });
       navigation.replace(CustomerRoute.Success, {
         appointmentId: appointment.id,
         startsAt: appointment.starts_at,
-        serviceName: service?.name ?? tr.customer.serviceFallback,
+        serviceName: totals.names || tr.customer.serviceFallback,
       });
     } catch (err) {
       setError(errorMessage(err));
@@ -125,10 +185,13 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>{tr.customer.scheduleTitle}</Text>
         <Text style={styles.subtitle}>{tr.customer.scheduleSubtitle}</Text>
-        {selectedService ? (
+        {bundle.length > 0 ? (
           <Text style={styles.serviceLine}>
-            {selectedService.name} ·{' '}
-            {formatPrice(selectedService.price_cents, selectedService.currency)}
+            {totals.names}
+            {' · '}
+            {formatDuration(totals.minutes)}
+            {' · '}
+            {formatPrice(totals.cents, totals.currency)}
           </Text>
         ) : null}
       </View>
@@ -166,7 +229,7 @@ export function CustomerScheduleScreen({ route, navigation }: Props) {
           label={tr.customer.book}
           onPress={onBook}
           loading={submitting}
-          disabled={!selectedSlot}
+          disabled={!selectedSlot || bundle.length === 0}
         />
       </View>
     </Screen>

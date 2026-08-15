@@ -26,7 +26,7 @@ export function ServiceCard({ service, selected, onPress }: ServiceCardProps) {
     >
       <View style={[styles.iconWrap, selected && styles.iconWrapSelected]}>
         <Ionicons
-          name={serviceIcon(service.name)}
+          name={serviceIcon(service.name, service.id)}
           size={22}
           color={selected ? colors.white : colors.ink}
         />

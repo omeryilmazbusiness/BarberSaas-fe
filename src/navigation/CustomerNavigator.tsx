@@ -62,7 +62,7 @@ export function CustomerPortalScreen({ route }: PortalProps) {
           <Stack.Screen
             name={CustomerRoute.Schedule}
             component={CustomerScheduleScreen}
-            initialParams={{ serviceId: '' }}
+            initialParams={{ serviceIds: '' }}
           />
           <Stack.Screen
             name={CustomerRoute.Success}

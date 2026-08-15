@@ -23,12 +23,20 @@ export const colors = {
   overlay: 'rgba(10, 10, 10, 0.45)',
   available: success,
   unavailable: danger,
+  agenda: {
+    upcoming: '#16A34A',
+    upcomingSoft: '#F0FDF4',
+    completed: '#2563EB',
+    completedSoft: '#EFF6FF',
+    noShow: '#DC2626',
+    noShowSoft: '#FEF2F2',
+  },
   status: {
     pending: '#525252',
     confirmed: ink,
     cancelled: danger,
-    completed: '#404040',
-    no_show: muted,
+    completed: '#2563EB',
+    no_show: '#DC2626',
   },
 } as const;
 
@@ -45,6 +53,17 @@ export const radius = {
   sm: 6,
   md: 10,
   lg: 16,
+  xl: 24,
+  pill: 999,
+} as const;
+
+/** Shared layout metrics for shop chrome (floating glass tab bar). */
+export const layout = {
+  floatingTabBarHeight: 64,
+  floatingTabBarBottom: 12,
+  floatingTabBarHorizontal: 16,
+  /** Content clearance under floating tab bar (+ safe breathing room). */
+  floatingTabBarContentInset: 96,
 } as const;
 
 export const typography = {

@@ -17,6 +17,7 @@ const users: User[] = [
     id: '55555555-5555-5555-5555-555555555552',
     tenant_id: mockAuthFixtures.mockTenant.id,
     email: 'customer@example.com',
+    phone: '05321234567',
     full_name: 'Can Yılmaz',
     role: UserRole.Customer,
     is_active: true,

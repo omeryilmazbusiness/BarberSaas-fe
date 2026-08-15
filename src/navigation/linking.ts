@@ -26,10 +26,11 @@ function rewriteLegacyCustomerLogin(path: string): string {
 }
 
 /**
- * Public portal paths (path params only — never ?shopSlug=):
+ * Public portal paths:
+ * - /                          → shop directory
  * - /admin/login
  * - /:shopSlug/manager
- * - /:shopSlug/login | /services | /schedule/:serviceId | /success | /profile
+ * - /:shopSlug/login | …
  */
 export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [
@@ -39,7 +40,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
     'http://localhost:19006',
   ],
   config: {
+    initialRouteName: StackRoute.ShopDirectory,
     screens: {
+      [StackRoute.ShopDirectory]: '',
       [StackRoute.AdminLogin]: 'admin/login',
       [StackRoute.ManagerLogin]: ':shopSlug/manager',
       [StackRoute.Customer]: {
@@ -50,7 +53,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           [CustomerRoute.Login]: 'login',
           [CustomerRoute.Services]: 'services',
-          [CustomerRoute.Schedule]: 'schedule/:serviceId',
+          [CustomerRoute.Schedule]: 'schedule/:serviceIds',
           [CustomerRoute.Success]: 'success',
           [CustomerRoute.Profile]: 'profile',
         },

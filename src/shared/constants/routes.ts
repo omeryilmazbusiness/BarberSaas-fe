@@ -13,14 +13,19 @@ export const ShopTabRoute = {
 
 export const StackRoute = {
   AdminLogin: 'AdminLogin',
+  Admin: 'Admin',
   ManagerLogin: 'ManagerLogin',
+  ShopDirectory: 'ShopDirectory',
   Customer: 'Customer',
   Auth: 'Auth',
   Shop: 'Shop',
   CreateAppointment: 'CreateAppointment',
+  AppointmentDetail: 'AppointmentDetail',
   CreateStaff: 'CreateStaff',
   CreateService: 'CreateService',
   CreateUser: 'CreateUser',
+  ShopSettings: 'ShopSettings',
+  ShopSetup: 'ShopSetup',
 } as const;
 
 export const CustomerRoute = {

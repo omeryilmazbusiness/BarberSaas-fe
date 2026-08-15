@@ -12,6 +12,7 @@ import { Input } from '../../../shared/ui/Input';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
 import { errorMessage } from '../../../shared/ui/format';
+import { roleLabel } from '../../../shared/ui/roleLabel';
 
 type Props = NativeStackScreenProps<RootStackParamList, typeof StackRoute.CreateUser>;
 
@@ -84,7 +85,7 @@ export function CreateUserScreen({ navigation }: Props) {
                 onPress={() => setRole(r)}
                 style={[styles.chip, role === r && styles.chipActive]}
               >
-                {r}
+                {roleLabel(r)}
               </Text>
             ))}
           </View>
@@ -127,7 +128,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     overflow: 'hidden',
     color: colors.ink,
-    textTransform: 'capitalize',
   },
   chipActive: {
     backgroundColor: colors.accentSoft,

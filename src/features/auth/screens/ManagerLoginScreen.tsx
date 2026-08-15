@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
-import { StackRoute } from '../../../shared/constants/routes';
+import { CustomerRoute, StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
 import { tr } from '../../../shared/i18n/tr';
 import { colors, spacing, typography } from '../../../shared/theme';
@@ -16,6 +17,7 @@ import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
 import { Screen } from '../../../shared/ui/Screen';
 import { errorMessage } from '../../../shared/ui/format';
+import { formatShopBrand } from '../../../shared/ui/ScreenHeader';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -25,17 +27,37 @@ type Props = NativeStackScreenProps<
 /** Shop manager entry — /:shopSlug/manager */
 export function ManagerLoginScreen({ route, navigation }: Props) {
   const shopSlug = route.params?.shopSlug ?? 'acme-barber';
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, services } = useAuth();
   const [email, setEmail] = useState('owner@acme.com');
   const [password, setPassword] = useState('secret123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shopName, setShopName] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       navigation.replace(StackRoute.Shop);
     }
   }, [isAuthenticated, navigation]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const tenant = await services.tenants.getBySlug(shopSlug);
+        if (!cancelled) {
+          setShopName(tenant.name);
+        }
+      } catch {
+        if (!cancelled) {
+          setShopName(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [services.tenants, shopSlug]);
 
   const onSubmit = async () => {
     setError(null);
@@ -61,8 +83,10 @@ export function ManagerLoginScreen({ route, navigation }: Props) {
         style={styles.wrap}
       >
         <View style={styles.hero}>
-          <Text style={styles.eyebrow}>{shopSlug}</Text>
-          <Text style={styles.title}>{tr.manager.title}</Text>
+          <Text style={styles.brand}>
+            {formatShopBrand(shopName, shopSlug)}
+          </Text>
+          <Text style={styles.badge}>{tr.manager.title}</Text>
           <Text style={styles.subtitle}>{tr.manager.subtitle}</Text>
         </View>
         <View style={styles.form}>
@@ -80,8 +104,29 @@ export function ManagerLoginScreen({ route, navigation }: Props) {
             onChangeText={setPassword}
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button label={tr.common.signIn} onPress={onSubmit} loading={loading} />
+          <Button
+            label={tr.common.signIn}
+            onPress={onSubmit}
+            loading={loading}
+          />
+          <Button
+            label={tr.manager.customerLoginCta}
+            variant="secondary"
+            onPress={() =>
+              navigation.navigate(StackRoute.Customer, {
+                shopSlug,
+                screen: CustomerRoute.Login,
+              })
+            }
+            disabled={loading}
+          />
         </View>
+        <Pressable
+          onPress={() => navigation.navigate(StackRoute.ShopDirectory)}
+          hitSlop={8}
+        >
+          <Text style={styles.dirLink}>← {tr.admin.backToShops}</Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -97,13 +142,16 @@ const styles = StyleSheet.create({
   hero: {
     gap: spacing.sm,
   },
-  eyebrow: {
+  brand: {
+    ...typography.brand,
+    fontSize: 34,
+    letterSpacing: 0,
+  },
+  badge: {
     ...typography.caption,
+    color: colors.muted,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
-  },
-  title: {
-    ...typography.brand,
   },
   subtitle: {
     ...typography.subtitle,
@@ -114,5 +162,10 @@ const styles = StyleSheet.create({
   error: {
     ...typography.caption,
     color: colors.danger,
+  },
+  dirLink: {
+    ...typography.label,
+    color: colors.muted,
+    textAlign: 'center',
   },
 });

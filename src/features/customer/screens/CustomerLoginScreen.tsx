@@ -7,16 +7,18 @@ import {
   Text,
   View,
 } from 'react-native';
+import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CustomerRoute } from '../../../shared/constants/routes';
-import type { CustomerStackParamList } from '../../../navigation/types';
+import { CustomerRoute, StackRoute } from '../../../shared/constants/routes';
+import type { CustomerStackParamList, RootStackParamList } from '../../../navigation/types';
 import { tr } from '../../../shared/i18n/tr';
 import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
 import { Screen } from '../../../shared/ui/Screen';
 import { errorMessage } from '../../../shared/ui/format';
+import { formatShopBrand } from '../../../shared/ui/ScreenHeader';
 import { useCustomerSession } from '../session/CustomerSessionContext';
 import { useCustomerShop } from '../session/CustomerShopContext';
 
@@ -34,6 +36,17 @@ export function CustomerLoginScreen({ navigation }: Props) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shopName, setShopName] = useState<string | null>(null);
+
+  const goManagerLogin = () => {
+    const root = navigation.getParent<
+      NativeStackScreenProps<RootStackParamList>['navigation']
+    >();
+    if (root) {
+      root.navigate(StackRoute.ManagerLogin, { shopSlug });
+      return;
+    }
+    void Linking.openURL(`/${encodeURIComponent(shopSlug)}/manager`);
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -97,10 +110,10 @@ export function CustomerLoginScreen({ navigation }: Props) {
         style={styles.wrap}
       >
         <View style={styles.hero}>
-          {shopName ? (
-            <Text style={styles.eyebrow}>{shopName}</Text>
-          ) : null}
-          <Text style={styles.title}>{tr.customer.loginTitle}</Text>
+          <Text style={styles.brand}>
+            {formatShopBrand(shopName, shopSlug)}
+          </Text>
+          <Text style={styles.loginLabel}>{tr.customer.loginTitle}</Text>
           <Text style={styles.subtitle}>{tr.customer.loginSubtitle}</Text>
         </View>
 
@@ -149,6 +162,19 @@ export function CustomerLoginScreen({ navigation }: Props) {
         {services.useMockApi ? (
           <Text style={styles.hint}>{tr.customer.mockHint}</Text>
         ) : null}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={tr.customer.managerLink}
+          onPress={goManagerLogin}
+          hitSlop={12}
+          style={({ pressed }) => [
+            styles.managerLink,
+            pressed && styles.managerPressed,
+          ]}
+        >
+          <Text style={styles.managerText}>{tr.customer.managerLink}</Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -164,14 +190,16 @@ const styles = StyleSheet.create({
   hero: {
     gap: spacing.sm,
   },
-  eyebrow: {
+  brand: {
+    ...typography.brand,
+    fontSize: 34,
+    letterSpacing: 0,
+  },
+  loginLabel: {
     ...typography.caption,
+    color: colors.muted,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
-    color: colors.muted,
-  },
-  title: {
-    ...typography.brand,
   },
   subtitle: {
     ...typography.subtitle,
@@ -224,5 +252,18 @@ const styles = StyleSheet.create({
   googleLabel: {
     ...typography.label,
     fontSize: 15,
+  },
+  managerLink: {
+    marginTop: spacing.xl,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  managerPressed: {
+    opacity: 0.7,
+  },
+  managerText: {
+    ...typography.caption,
+    color: colors.muted,
+    letterSpacing: 0.4,
   },
 });

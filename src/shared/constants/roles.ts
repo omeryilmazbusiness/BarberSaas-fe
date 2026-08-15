@@ -22,3 +22,12 @@ export function isAdminRole(role: UserRole): boolean {
 export function canShopLogin(role: UserRole): boolean {
   return ShopRoles.includes(role);
 }
+
+/** UI grouping: personel vs müşteri tabs. */
+export function isStaffUserRole(role: UserRole): boolean {
+  return role === UserRole.Owner || role === UserRole.Manager || role === UserRole.Staff;
+}
+
+export function isCustomerUserRole(role: UserRole): boolean {
+  return role === UserRole.Customer;
+}

@@ -29,6 +29,9 @@ function resolveTenant(slug: string): Tenant {
       .join(' '),
     status: TenantStatus.Trial,
     timezone: 'Europe/Istanbul',
+    open_time: '09:00',
+    close_time: '18:00',
+    slot_minutes: 30,
   };
 }
 

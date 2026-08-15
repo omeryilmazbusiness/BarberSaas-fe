@@ -14,4 +14,6 @@ export interface AppointmentService {
   create(input: CreateAppointmentInput): Promise<Appointment>;
   confirm(id: string): Promise<Appointment>;
   cancel(id: string): Promise<Appointment>;
+  complete(id: string): Promise<Appointment>;
+  markNoShow(id: string): Promise<Appointment>;
 }

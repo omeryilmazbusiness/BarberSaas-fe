@@ -20,12 +20,14 @@ interface CustomerSessionContextValue {
   session: CustomerSession | null;
   isAuthenticated: boolean;
   isBootstrapping: boolean;
-  selectedService: CatalogServiceEntity | null;
+  /** Ordered multi-select for booking. */
+  selectedServices: CatalogServiceEntity[];
   services: AppServices;
   loginWithPhone: (shopSlug: string, phone: string) => Promise<void>;
   loginWithGoogle: (shopSlug: string) => Promise<void>;
   logout: () => Promise<void>;
-  setSelectedService: (service: CatalogServiceEntity | null) => void;
+  setSelectedServices: (services: CatalogServiceEntity[]) => void;
+  toggleSelectedService: (service: CatalogServiceEntity) => void;
 }
 
 const CustomerSessionContext = createContext<CustomerSessionContextValue | null>(
@@ -40,13 +42,14 @@ interface ProviderProps {
 export function CustomerSessionProvider({ services, children }: ProviderProps) {
   const [session, setSession] = useState<CustomerSession | null>(null);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
-  const [selectedService, setSelectedService] =
-    useState<CatalogServiceEntity | null>(null);
+  const [selectedServices, setSelectedServices] = useState<
+    CatalogServiceEntity[]
+  >([]);
 
   useEffect(() => {
     return portalSessionEvents.onShopLogin(() => {
       setSession(null);
-      setSelectedService(null);
+      setSelectedServices([]);
     });
   }, []);
 
@@ -59,7 +62,6 @@ export function CustomerSessionProvider({ services, children }: ProviderProps) {
           return;
         }
         if (shopSession) {
-          // Manager/shop session wins — clear stale customer portal state.
           await customerSessionStore.clear();
           return;
         }
@@ -85,7 +87,6 @@ export function CustomerSessionProvider({ services, children }: ProviderProps) {
         shop_slug: shopSlug,
         phone,
       });
-      // Isolate portals: customer JWT must not ride shop/manager requests.
       await sessionStore.clear();
       await customerSessionStore.save(next);
       authPortal.set('customer');
@@ -117,7 +118,17 @@ export function CustomerSessionProvider({ services, children }: ProviderProps) {
       authPortal.set('none');
     }
     setSession(null);
-    setSelectedService(null);
+    setSelectedServices([]);
+  }, []);
+
+  const toggleSelectedService = useCallback((service: CatalogServiceEntity) => {
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s.id === service.id);
+      if (exists) {
+        return prev.filter((s) => s.id !== service.id);
+      }
+      return [...prev, service];
+    });
   }, []);
 
   const value = useMemo<CustomerSessionContextValue>(
@@ -125,21 +136,23 @@ export function CustomerSessionProvider({ services, children }: ProviderProps) {
       session,
       isAuthenticated: Boolean(session),
       isBootstrapping,
-      selectedService,
+      selectedServices,
       services,
       loginWithPhone,
       loginWithGoogle,
       logout,
-      setSelectedService,
+      setSelectedServices,
+      toggleSelectedService,
     }),
     [
       session,
       isBootstrapping,
-      selectedService,
+      selectedServices,
       services,
       loginWithPhone,
       loginWithGoogle,
       logout,
+      toggleSelectedService,
     ],
   );
 

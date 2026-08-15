@@ -2,7 +2,7 @@ import { ApiPath } from '../../../core/api/endpoints';
 import type { HttpClient } from '../../../core/api/httpClient';
 import type { Tenant } from '../../../core/types/domain';
 import type { CreateShopInput, CreateShopResult } from '../../auth/services/AuthService';
-import type { TenantService } from './TenantService';
+import type { TenantService, UpdateWorkingHoursInput } from './TenantService';
 
 export class HttpTenantService implements TenantService {
   constructor(private readonly http: HttpClient) {}
@@ -31,6 +31,18 @@ export class HttpTenantService implements TenantService {
       path: ApiPath.Tenants,
       body: input,
       auth: false,
+    });
+  }
+
+  getMe(): Promise<Tenant> {
+    return this.http.request<Tenant>({ path: ApiPath.TenantMe });
+  }
+
+  updateWorkingHours(input: UpdateWorkingHoursInput): Promise<Tenant> {
+    return this.http.request<Tenant>({
+      method: 'PUT',
+      path: ApiPath.TenantWorkingHours,
+      body: input,
     });
   }
 }

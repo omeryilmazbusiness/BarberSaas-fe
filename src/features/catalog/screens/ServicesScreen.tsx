@@ -16,6 +16,7 @@ import { IconButton } from '../../../shared/ui/IconButton';
 import { ListRow } from '../../../shared/ui/ListRow';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { formatDuration, formatPrice } from '../../../shared/ui/format';
+import { serviceBarberIcon } from '../../../shared/ui/serviceIcon';
 
 export function ServicesScreen() {
   const { services, user } = useAuth();
@@ -44,7 +45,7 @@ export function ServicesScreen() {
   );
 
   return (
-    <Screen loading={loading}>
+    <Screen loading={loading} tabInset>
       <ScreenHeader
         title={tr.services.title}
         subtitle={tr.services.subtitle}
@@ -75,7 +76,11 @@ export function ServicesScreen() {
               meta={formatPrice(item.price_cents, item.currency)}
               leading={
                 <View style={styles.icon}>
-                  <Ionicons name="pricetag" size={18} color={colors.accent} />
+                  <Ionicons
+                    name={serviceBarberIcon(item.id || item.name)}
+                    size={18}
+                    color={colors.accent}
+                  />
                 </View>
               }
             />

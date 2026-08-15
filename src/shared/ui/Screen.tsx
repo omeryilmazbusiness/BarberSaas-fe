@@ -7,13 +7,15 @@ import {
   type ViewProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../theme';
+import { colors, layout, spacing } from '../theme';
 
 interface ScreenProps extends ViewProps {
   children: React.ReactNode;
   scroll?: boolean;
   loading?: boolean;
   padded?: boolean;
+  /** Extra bottom padding for the floating glass shop tab bar. */
+  tabInset?: boolean;
 }
 
 export function Screen({
@@ -21,6 +23,7 @@ export function Screen({
   scroll = true,
   loading = false,
   padded = true,
+  tabInset = false,
   style,
   ...rest
 }: ScreenProps) {
@@ -32,6 +35,10 @@ export function Screen({
     children
   );
 
+  const insetStyle = tabInset
+    ? { paddingBottom: layout.floatingTabBarContentInset }
+    : null;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       {scroll && !loading ? (
@@ -39,6 +46,7 @@ export function Screen({
           contentContainerStyle={[
             styles.content,
             padded && styles.padded,
+            insetStyle,
             style,
           ]}
           keyboardShouldPersistTaps="handled"
@@ -47,7 +55,16 @@ export function Screen({
           {content}
         </ScrollView>
       ) : (
-        <View style={[styles.content, padded && styles.padded, styles.flex, style]} {...rest}>
+        <View
+          style={[
+            styles.content,
+            padded && styles.padded,
+            styles.flex,
+            insetStyle,
+            style,
+          ]}
+          {...rest}
+        >
           {content}
         </View>
       )}

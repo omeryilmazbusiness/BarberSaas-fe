@@ -4,8 +4,9 @@ import type {
   GetAvailabilityInput,
 } from './AvailabilityService';
 
-const OPEN_HOUR = 9;
-const CLOSE_HOUR = 18;
+const OPEN_MINUTE = 9 * 60;
+const CLOSE_MINUTE = 18 * 60;
+/** Mock has no catalog lookup — assume classic 30 min service. */
 const SLOT_MINUTES = 30;
 
 /**
@@ -34,19 +35,21 @@ export class MockAvailabilityService implements AvailabilityService {
 
 function buildSlots(day: Date, serviceId: string): TimeSlot[] {
   const slots: TimeSlot[] = [];
-  for (let hour = OPEN_HOUR; hour < CLOSE_HOUR; hour += 1) {
-    for (let minute = 0; minute < 60; minute += SLOT_MINUTES) {
-      const starts = new Date(day);
-      starts.setHours(hour, minute, 0, 0);
-      const ends = new Date(starts.getTime() + SLOT_MINUTES * 60 * 1000);
-      const seed = hash(`${toDateKey(day)}-${hour}-${minute}-${serviceId}`);
-      const available = seed % 5 !== 0; // ~80% available
-      slots.push({
-        starts_at: starts.toISOString(),
-        ends_at: ends.toISOString(),
-        available,
-      });
-    }
+  for (
+    let minute = OPEN_MINUTE;
+    minute + SLOT_MINUTES <= CLOSE_MINUTE;
+    minute += SLOT_MINUTES
+  ) {
+    const starts = new Date(day);
+    starts.setHours(Math.floor(minute / 60), minute % 60, 0, 0);
+    const ends = new Date(starts.getTime() + SLOT_MINUTES * 60 * 1000);
+    const seed = hash(`${toDateKey(day)}-${minute}-${serviceId}`);
+    const available = seed % 5 !== 0; // ~80% available
+    slots.push({
+      starts_at: starts.toISOString(),
+      ends_at: ends.toISOString(),
+      available,
+    });
   }
   return slots;
 }

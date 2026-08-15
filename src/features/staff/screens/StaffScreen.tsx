@@ -43,7 +43,7 @@ export function StaffScreen() {
   );
 
   return (
-    <Screen loading={loading}>
+    <Screen loading={loading} tabInset>
       <ScreenHeader
         title={tr.staff.title}
         subtitle={tr.staff.subtitle}

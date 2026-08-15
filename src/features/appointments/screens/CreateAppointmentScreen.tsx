@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../../core/auth/AuthContext';
@@ -7,17 +7,30 @@ import { UserRole } from '../../../shared/constants/roles';
 import { StackRoute } from '../../../shared/constants/routes';
 import type { RootStackParamList } from '../../../navigation/types';
 import { tr } from '../../../shared/i18n/tr';
-import { colors, spacing, typography } from '../../../shared/theme';
+import { colors, radius, spacing, typography } from '../../../shared/theme';
 import { Button } from '../../../shared/ui/Button';
 import { Input } from '../../../shared/ui/Input';
 import { Screen } from '../../../shared/ui/Screen';
 import { ScreenHeader } from '../../../shared/ui/ScreenHeader';
-import { errorMessage } from '../../../shared/ui/format';
+import {
+  errorMessage,
+  formatLocalDateInput,
+  formatLocalDateTimeLong,
+  formatLocalTimeInput,
+  parseLocalDateTime,
+} from '../../../shared/ui/format';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
   typeof StackRoute.CreateAppointment
 >;
+
+function defaultStart(): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(11, 0, 0, 0);
+  return d;
+}
 
 export function CreateAppointmentScreen({ navigation }: Props) {
   const { services } = useAuth();
@@ -27,16 +40,18 @@ export function CreateAppointmentScreen({ navigation }: Props) {
   const [customerId, setCustomerId] = useState('');
   const [staffId, setStaffId] = useState('');
   const [serviceId, setServiceId] = useState('');
-  const [startsAt, setStartsAt] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    d.setHours(11, 0, 0, 0);
-    return d.toISOString().slice(0, 16);
-  });
+  const initial = defaultStart();
+  const [dateText, setDateText] = useState(() => formatLocalDateInput(initial));
+  const [timeText, setTimeText] = useState(() => formatLocalTimeInput(initial));
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [bootLoading, setBootLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const parsedStart = useMemo(
+    () => parseLocalDateTime(dateText, timeText),
+    [dateText, timeText],
+  );
 
   useEffect(() => {
     (async () => {
@@ -61,14 +76,17 @@ export function CreateAppointmentScreen({ navigation }: Props) {
 
   const onSubmit = async () => {
     setError(null);
+    if (!parsedStart) {
+      setError(tr.createAppointment.startsAtInvalid);
+      return;
+    }
     setLoading(true);
     try {
-      const iso = new Date(startsAt).toISOString();
       await services.appointments.create({
         customer_id: customerId,
         staff_id: staffId,
         service_id: serviceId,
-        starts_at: iso,
+        starts_at: parsedStart.toISOString(),
         notes: notes.trim() || undefined,
       });
       navigation.goBack();
@@ -109,13 +127,47 @@ export function CreateAppointmentScreen({ navigation }: Props) {
           }))}
           onChange={setServiceId}
         />
-        <Input
-          label={tr.createAppointment.startsAtLocal}
-          value={startsAt}
-          onChangeText={setStartsAt}
-          placeholder="YYYY-MM-DDTHH:mm"
-          autoCapitalize="none"
-        />
+
+        <Text style={styles.sectionLabel}>{tr.createAppointment.startsAtLocal}</Text>
+        <Text style={styles.hint}>{tr.createAppointment.startsAtHint}</Text>
+        <View style={styles.row}>
+          <View style={styles.half}>
+            <Input
+              label={tr.createAppointment.startsAtDate}
+              value={dateText}
+              onChangeText={setDateText}
+              placeholder="15.08.2026"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={styles.half}>
+            <Input
+              label={tr.createAppointment.startsAtTime}
+              value={timeText}
+              onChangeText={setTimeText}
+              placeholder="11:00"
+              keyboardType="numbers-and-punctuation"
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View
+          style={[
+            styles.preview,
+            !parsedStart && styles.previewInvalid,
+          ]}
+        >
+          <Text style={styles.previewLabel}>
+            {tr.createAppointment.startsAtPreview}
+          </Text>
+          <Text style={styles.previewValue}>
+            {parsedStart
+              ? formatLocalDateTimeLong(parsedStart)
+              : tr.createAppointment.startsAtInvalid}
+          </Text>
+        </View>
+
         <Input
           label={tr.createAppointment.notes}
           value={notes}
@@ -127,7 +179,7 @@ export function CreateAppointmentScreen({ navigation }: Props) {
           label={tr.createAppointment.submit}
           onPress={onSubmit}
           loading={loading}
-          disabled={!customerId || !staffId || !serviceId}
+          disabled={!customerId || !staffId || !serviceId || !parsedStart}
         />
       </View>
     </Screen>
@@ -179,6 +231,40 @@ function SelectField({
 const styles = StyleSheet.create({
   form: {
     gap: spacing.md,
+  },
+  sectionLabel: {
+    ...typography.label,
+  },
+  hint: {
+    ...typography.caption,
+    marginTop: -spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  half: {
+    flex: 1,
+  },
+  preview: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    padding: spacing.md,
+    gap: 4,
+  },
+  previewInvalid: {
+    borderColor: colors.danger,
+    backgroundColor: '#FEF2F2',
+  },
+  previewLabel: {
+    ...typography.caption,
+  },
+  previewValue: {
+    ...typography.label,
+    fontSize: 15,
+    textTransform: 'capitalize',
   },
   select: {
     gap: spacing.sm,

@@ -14,6 +14,9 @@ export class HttpAvailabilityService implements AvailabilityService {
       service_id: input.service_id,
       days: String(input.days ?? 7),
     });
+    if (input.duration_minutes && input.duration_minutes > 0) {
+      params.set('duration_minutes', String(input.duration_minutes));
+    }
     return this.http.request<DayAvailability[]>({
       path: `${ApiPath.Availability}?${params.toString()}`,
     });

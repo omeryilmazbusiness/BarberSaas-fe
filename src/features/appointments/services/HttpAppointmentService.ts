@@ -34,4 +34,18 @@ export class HttpAppointmentService implements AppointmentService {
       path: ApiPath.CancelAppointment(id),
     });
   }
+
+  complete(id: string): Promise<Appointment> {
+    return this.http.request<Appointment>({
+      method: 'POST',
+      path: ApiPath.CompleteAppointment(id),
+    });
+  }
+
+  markNoShow(id: string): Promise<Appointment> {
+    return this.http.request<Appointment>({
+      method: 'POST',
+      path: ApiPath.NoShowAppointment(id),
+    });
+  }
 }
